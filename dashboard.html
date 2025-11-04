@@ -10,8 +10,7 @@
 <body class="bg-gray-50">
   <div class="min-h-screen p-6">
     <div class="max-w-[1600px] mx-auto">
-      <!-- Header with Stats -->
-      <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p class="text-sm text-gray-600">Your cooking overview</p>
@@ -73,10 +72,8 @@
         </div>
       </div>
 
-      <!-- Main Content - 2 Column Layout -->
-      <div class="grid grid-cols-[2fr_1fr] gap-6">
-        <!-- Left Column - Weekly Meal Plan -->
-        <div class="space-y-6">
+            <div class="grid grid-cols-[2fr_1fr] gap-6">
+                <div class="space-y-6">
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-bold text-gray-900">Weekly Meal Plan</h2>
@@ -96,8 +93,7 @@
             </div>
 
             <div class="grid grid-cols-7 gap-2">
-              <!-- Monday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Mon</h3>
                 <div class="space-y-2">
                   <div>
@@ -115,8 +111,7 @@
                 </div>
               </div>
 
-              <!-- Tuesday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Tue</h3>
                 <div class="space-y-2">
                   <div>
@@ -134,8 +129,7 @@
                 </div>
               </div>
 
-              <!-- Wednesday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Wed</h3>
                 <div class="space-y-2">
                   <div>
@@ -153,8 +147,7 @@
                 </div>
               </div>
 
-              <!-- Thursday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Thu</h3>
                 <div class="space-y-2">
                   <div>
@@ -172,8 +165,7 @@
                 </div>
               </div>
 
-              <!-- Friday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Fri</h3>
                 <div class="space-y-2">
                   <div>
@@ -191,8 +183,7 @@
                 </div>
               </div>
 
-              <!-- Saturday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Sat</h3>
                 <div class="space-y-2">
                   <div>
@@ -210,8 +201,7 @@
                 </div>
               </div>
 
-              <!-- Sunday -->
-              <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
+                            <div class="bg-gray-50 rounded border border-gray-200 p-2 hover:border-gray-400 transition-colors">
                 <h3 class="font-semibold text-xs text-gray-900 mb-2 text-center border-b pb-1">Sun</h3>
                 <div class="space-y-2">
                   <div>
@@ -231,24 +221,20 @@
             </div>
           </div>
 
-          <!-- Charts Row -->
-          <div class="grid grid-cols-2 gap-6">
-            <!-- Recipe Types Distribution -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
               <h2 class="text-lg font-bold text-gray-900 mb-4">Recipe Types</h2>
               <canvas id="barChart" height="240"></canvas>
             </div>
 
-            <!-- Favorite Recipes by Category -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
               <h2 class="text-lg font-bold text-gray-900 mb-4">Favorites by Category</h2>
               <canvas id="pieChart" height="240"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- Right Column - Quick Actions & Legend -->
-        <div class="space-y-6">
+                <div class="space-y-6">
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div class="space-y-3">
