@@ -7,21 +7,28 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import AddRecipe from './pages/AddRecipe'
 import RecipeDetails from './pages/RecipeDetails'
+import Shop from './pages/Shop'
+import Cart from './pages/Cart'
+import { CartProvider } from './context/CartContext'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/add-recipe" element={<AddRecipe />} />
-        <Route path="/recipe/:id" element={<RecipeDetails />} />
-      </Routes>
-    </Router>
+    <CartProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-recipe" element={<AddRecipe />} />
+          <Route path="/recipe/:id" element={<RecipeDetails />} />
+        </Routes>
+      </Router>
+    </CartProvider>
   )
 }
 
