@@ -36,4 +36,9 @@ function App() {
           <Route path="/collections" element={<Collections />} />
           <Route path="/collection/:id" element={<CollectionDetail />} />
         </Routes>
-      </Router
+      </Router>
+    </CartProvider>
+  )
+}
+
+export default App

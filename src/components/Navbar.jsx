@@ -166,7 +166,6 @@ function Navbar() {
             <Link to="/explore" className="hover:text-orange-500 cursor-pointer">Explore</Link>
             <Link to="/collections" className="hover:text-orange-500 cursor-pointer">Collections</Link>
             <Link to="/shop" className="hover:text-orange-500 cursor-pointer">Shop</Link>
-            <a href="#collections" className="hover:text-orange-500 cursor-pointer">Collections</a>
             <Link to="/dashboard" className="hover:text-orange-500 cursor-pointer">Meal Planner</Link>
           </div>
           <div className="flex gap-4">

@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import recipes from '../data/recipes.json'
 import { useState, useEffect } from 'react'
+import Navbar from '../components/Navbar'
 
 function RecipeDetails() {
   const { id } = useParams()
@@ -51,33 +52,7 @@ function RecipeDetails() {
 
   return (
     <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
-      <nav className="bg-white border-b">
-        <div className="container mx-auto flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-12">
-            <div className="text-2xl font-bold text-gray-900">FOODIES</div>
-            <ul className="flex items-center gap-6 text-sm text-gray-800">
-              <li><a href="#" className="hover:text-orange-500">Recipes ▾</a></li>
-              <li><a href="#" className="hover:text-orange-500">Collections ▾</a></li>
-              <li><a href="#" className="hover:text-orange-500">Cravings ▾</a></li>
-              <li><a href="#" className="hover:text-orange-500">Budget ▾</a></li>
-            </ul>
-          </div>
-
-          <div className="flex items-center gap-2 flex-1 max-w-md mx-6">
-            <input 
-              type="text" 
-              placeholder="ingredient, dish"
-              className="w-full px-4 py-2 border rounded-full text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none" 
-            />
-            <button className="bg-gray-900 text-white px-6 py-2 rounded-full text-sm hover:bg-gray-800 whitespace-nowrap">Search</button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button className="border border-gray-300 px-6 py-2 rounded-md text-sm hover:bg-gray-100 whitespace-nowrap">Sign in</button>
-            <button className="bg-gray-900 text-white px-6 py-2 rounded-md text-sm hover:bg-gray-800 whitespace-nowrap">Register</button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <section className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex flex-col gap-6">
@@ -180,7 +155,7 @@ function RecipeDetails() {
                     <Link 
                       to="/collections" 
                       onClick={() => setShowCollectionDropdown(false)}
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
