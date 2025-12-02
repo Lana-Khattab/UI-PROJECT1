@@ -8,8 +8,6 @@ function CollectionDetail() {
   const navigate = useNavigate()
   const [collection, setCollection] = useState(null)
   const [collections, setCollections] = useState([])
-
-  // Load collections from localStorage
   useEffect(() => {
     const savedCollections = localStorage.getItem('recipe-collections')
     if (savedCollections) {
@@ -20,14 +18,12 @@ function CollectionDetail() {
     }
   }, [id])
 
-  // Update localStorage when collections change
   useEffect(() => {
     if (collections.length > 0) {
       localStorage.setItem('recipe-collections', JSON.stringify(collections))
     }
   }, [collections])
 
-  // Toggle favorite for this collection
   const toggleFavorite = () => {
     setCollections(collections.map(c => 
       c.id === collection.id ? { ...c, isFavorite: !c.isFavorite } : c
@@ -35,7 +31,6 @@ function CollectionDetail() {
     setCollection(prev => ({ ...prev, isFavorite: !prev.isFavorite }))
   }
 
-  // Remove recipe from collection
   const removeRecipe = (recipeId) => {
     const updatedCollection = {
       ...collection,
@@ -47,7 +42,6 @@ function CollectionDetail() {
     ))
   }
 
-  // Delete collection
   const deleteCollection = () => {
     if (window.confirm('Are you sure you want to delete this collection? All recipes will be removed from it.')) {
       const updatedCollections = collections.filter(c => c.id !== collection.id)
@@ -80,7 +74,6 @@ function CollectionDetail() {
       <Navbar />
      
       <div className="container mx-auto px-6 py-8">
-        {/* Back button */}
         <Link 
           to="/collections" 
           className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
@@ -90,8 +83,6 @@ function CollectionDetail() {
           </svg>
           Back to Collections
         </Link>
-
-        {/* Collection Header */}
         <div className={`${collection.color} ${collection.borderColor} border rounded-2xl p-8 mb-8`}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
@@ -149,8 +140,6 @@ function CollectionDetail() {
             </div>
           </div>
         </div>
-
-        {/* Recipes Grid */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Recipes in this Collection</h2>

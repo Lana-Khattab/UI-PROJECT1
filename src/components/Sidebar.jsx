@@ -1,8 +1,33 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import useRandomRecipe from '../utils/useRandomRecipe'
+import { getCollections } from '../utils/collectionUtils'
 
 function Sidebar() {
   const goRandom = useRandomRecipe()
+  const [favoriteCollections, setFavoriteCollections] = useState([])
+
+  useEffect(() => {
+    const loadFavorites = () => {
+      const collections = getCollections()
+      const favorites = collections.filter(collection => collection.isFavorite)
+      setFavoriteCollections(favorites)
+    }
+
+    loadFavorites()
+
+    const handleStorageChange = () => {
+      loadFavorites()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('collectionsUpdated', handleStorageChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('collectionsUpdated', handleStorageChange)
+    }
+  }, [])
 
   return (
     <aside className="lg:col-span-3 space-y-4">
@@ -36,26 +61,23 @@ function Sidebar() {
             </svg>
             Favorites
           </h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <a href="#" className="text-gray-700 hover:text-orange-500 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-orange-400" />
-                Italian Pasta
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-gray-700 hover:text-orange-500 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400" />
-                Healthy Bowls
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-gray-700 hover:text-orange-500 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                Quick Dinners
-              </a>
-            </li>
-          </ul>
+          {favoriteCollections.length > 0 ? (
+            <ul className="space-y-2 text-sm">
+              {favoriteCollections.map((collection) => (
+                <li key={collection.id}>
+                  <Link 
+                    to={`/collection/${collection.id}`} 
+                    className="text-gray-700 hover:text-orange-500 flex items-center gap-2"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-orange-400" />
+                    {collection.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">No favorite collections yet</p>
+          )}
         </div>
       </div>
     </aside>

@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import NotificationsModal from './NotificationsModal'
+import CartModal from './CartModal'
 
 function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notifications, setNotifications] = useState([
     {
@@ -90,6 +92,10 @@ function Navbar() {
         notifications={notifications}
         setNotifications={setNotifications}
       />
+      <CartModal 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)}
+      />
       <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
         <Link to="/" className="text-2xl font-bold text-gray-900">FOODIES</Link>
@@ -152,7 +158,15 @@ function Navbar() {
                   <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">{unreadCount}</span>
                 )}
               </button>
-              <Link to="/cart" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Cart</Link>
+              <button 
+                onClick={() => {
+                  setIsCartOpen(true);
+                  setIsMobileMenuOpen(false);
+                }} 
+                className="hover:text-orange-500 text-left py-2"
+              >
+                Cart
+              </button>
               <Link to="/profile" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
             </div>
           </div>
@@ -175,7 +189,7 @@ function Navbar() {
                 <span className="absolute -top-1.5 right-0 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">{unreadCount}</span>
               )}
             </button>
-            <Link to="/cart" className="hover:text-orange-500">Cart</Link>
+            <button onClick={() => setIsCartOpen(true)} className="hover:text-orange-500">Cart</button>
             <Link to="/profile" className="hover:text-orange-500">Profile</Link>
           </div>
         </div>

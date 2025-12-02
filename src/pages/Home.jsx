@@ -152,12 +152,12 @@ function Home() {
               <h2 className="mb-4">Explore by Cuisine</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {cuisines.map((cuisine, index) => (
-                  <a href="#" key={index}>
+                  <Link to={`/explore?cuisine=${cuisine.name}`} key={index}>
                     <div className="bg-white rounded-xl border p-4 hover:bg-orange-50 hover:border-orange-300 transition-colors text-center">
                       <h4 className="font-semibold mb-1">{cuisine.name}</h4>
                       <p className="text-sm text-gray-600">{cuisine.count} recipes</p>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </section>
@@ -177,27 +177,27 @@ function Home() {
             <div>
               <h4 className="font-bold mb-4">Explore</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-orange-500">All Recipes</a></li>
-                <li><a href="#" className="hover:text-orange-500">Collections</a></li>
-                <li><a href="#" className="hover:text-orange-500">Meal Planner</a></li>
-                <li><a href="#" className="hover:text-orange-500">Create Recipe</a></li>
+                <li><Link to="/explore" className="hover:text-orange-500">All Recipes</Link></li>
+                <li><Link to="/collections" className="hover:text-orange-500">Collections</Link></li>
+                <li><Link to="/dashboard" className="hover:text-orange-500">Meal Planner</Link></li>
+                <li><Link to="/add-recipe" className="hover:text-orange-500">Create Recipe</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold mb-4">Community</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-orange-500">Community Feed</a></li>
+                <li><Link to="/" className="hover:text-orange-500">Community Feed</Link></li>
                 <li><Link to="/profile" className="hover:text-orange-500">Your Profile</Link></li>
-                <li><a href="#" className="hover:text-orange-500">Top Chefs</a></li>
+                <li><Link to="/explore" className="hover:text-orange-500">Top Chefs</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-orange-500">Help Center</a></li>
-                <li><a href="#" className="hover:text-orange-500">Contact Us</a></li>
-                <li><a href="#" className="hover:text-orange-500">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-orange-500">Terms of Service</a></li>
+                <li><Link to="/" className="hover:text-orange-500">Help Center</Link></li>
+                <li><Link to="/" className="hover:text-orange-500">Contact Us</Link></li>
+                <li><Link to="/" className="hover:text-orange-500">Privacy Policy</Link></li>
+                <li><Link to="/" className="hover:text-orange-500">Terms of Service</Link></li>
               </ul>
             </div>
           </div>

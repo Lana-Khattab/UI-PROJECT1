@@ -1,17 +1,12 @@
-// Utility functions for collection management
-
-// Get all collections from localStorage
 export const getCollections = () => {
   const saved = localStorage.getItem('recipe-collections')
   return saved ? JSON.parse(saved) : []
 }
 
-// Save collections to localStorage
 export const saveCollections = (collections) => {
   localStorage.setItem('recipe-collections', JSON.stringify(collections))
 }
 
-// Add recipe to collection
 export const addToCollection = (collectionId, recipeId) => {
   const collections = getCollections()
   const updatedCollections = collections.map(collection => {
@@ -24,7 +19,6 @@ export const addToCollection = (collectionId, recipeId) => {
   return updatedCollections
 }
 
-// Remove recipe from collection
 export const removeFromCollection = (collectionId, recipeId) => {
   const collections = getCollections()
   const updatedCollections = collections.map(collection => {
@@ -40,7 +34,6 @@ export const removeFromCollection = (collectionId, recipeId) => {
   return updatedCollections
 }
 
-// Create new collection
 export const createCollection = (name, description = '') => {
   const collections = getCollections()
   const newCollection = {
@@ -58,7 +51,6 @@ export const createCollection = (name, description = '') => {
   return updatedCollections
 }
 
-// Check if recipe is in any collection
 export const isRecipeInCollections = (recipeId) => {
   const collections = getCollections()
   return collections.some(collection => 
@@ -66,7 +58,6 @@ export const isRecipeInCollections = (recipeId) => {
   )
 }
 
-// Get collections containing a specific recipe
 export const getCollectionsForRecipe = (recipeId) => {
   const collections = getCollections()
   return collections.filter(collection => 

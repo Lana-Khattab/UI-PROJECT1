@@ -9,7 +9,6 @@ function RecipeDetails() {
   const [collections, setCollections] = useState([])
   const [showCollectionDropdown, setShowCollectionDropdown] = useState(false)
 
-  // Load collections from localStorage
   useEffect(() => {
     const savedCollections = localStorage.getItem('recipe-collections')
     if (savedCollections) {
@@ -17,7 +16,6 @@ function RecipeDetails() {
     }
   }, [])
 
-  // Add recipe to collection
   const addToCollection = (collectionId) => {
     const updatedCollections = collections.map(collection => {
       if (collection.id === collectionId && !collection.recipeIds.includes(parseInt(id))) {
@@ -30,7 +28,6 @@ function RecipeDetails() {
     setShowCollectionDropdown(false)
   }
 
-  // Check if recipe is already in a collection
   const isInCollection = (collectionId) => {
     const collection = collections.find(c => c.id === collectionId)
     return collection ? collection.recipeIds.includes(parseInt(id)) : false
@@ -105,7 +102,6 @@ function RecipeDetails() {
             <button className="bg-gray-900 text-white px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-800">Favorited</button>
             <button className="border border-gray-900 text-gray-900 px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-50">Add to Meal Plan</button>
             
-            {/* Add to Collection Dropdown */}
             <div className="relative">
               <button 
                 onClick={() => setShowCollectionDropdown(!showCollectionDropdown)}

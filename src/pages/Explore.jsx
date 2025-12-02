@@ -13,8 +13,14 @@ function Explore() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab')
+    const cuisineParam = searchParams.get('cuisine')
+    
     if (tabParam === 'favorites') {
       setActiveTab('favorites')
+    }
+    
+    if (cuisineParam) {
+      setSelectedCuisine(cuisineParam)
     }
   }, [searchParams])
 

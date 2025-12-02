@@ -4,20 +4,17 @@ import { Link } from 'react-router-dom'
 import recipes from '../data/recipes.json'
 
 function Collections() {
-  // State for collections (loaded from localStorage)
   const [collections, setCollections] = useState([])
   const [newCollectionName, setNewCollectionName] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingCollection, setEditingCollection] = useState(null)
   const [editName, setEditName] = useState('')
 
-  // Load collections from localStorage on mount
   useEffect(() => {
     const savedCollections = localStorage.getItem('recipe-collections')
     if (savedCollections) {
       setCollections(JSON.parse(savedCollections))
     } else {
-      // Initialize with default collections
       const defaultCollections = [
         {
           id: 1,
@@ -65,19 +62,16 @@ function Collections() {
     }
   }, [])
 
-  // Save collections to localStorage whenever they change
   useEffect(() => {
     if (collections.length > 0) {
       localStorage.setItem('recipe-collections', JSON.stringify(collections))
     }
   }, [collections])
 
-  // Get recipe details by ID
   const getRecipeById = (id) => {
     return recipes.find(recipe => recipe.id === id)
   }
 
-  // Create new collection
   const handleCreateCollection = (e) => {
     e.preventDefault()
     if (!newCollectionName.trim()) return
@@ -98,14 +92,12 @@ function Collections() {
     setShowCreateForm(false)
   }
 
-  // Delete collection
   const handleDeleteCollection = (collectionId) => {
     if (window.confirm('Are you sure you want to delete this collection?')) {
       setCollections(collections.filter(collection => collection.id !== collectionId))
     }
   }
 
-  // Toggle favorite for collection
   const toggleCollectionFavorite = (collectionId) => {
     setCollections(collections.map(collection => 
       collection.id === collectionId 
@@ -114,7 +106,6 @@ function Collections() {
     ))
   }
 
-  // Add recipe to collection (this would be called from recipe details)
   const addRecipeToCollection = (collectionId, recipeId) => {
     setCollections(collections.map(collection => {
       if (collection.id === collectionId && !collection.recipeIds.includes(recipeId)) {
@@ -124,7 +115,6 @@ function Collections() {
     }))
   }
 
-  // Remove recipe from collection
   const removeRecipeFromCollection = (collectionId, recipeId) => {
     setCollections(collections.map(collection => {
       if (collection.id === collectionId) {
@@ -137,7 +127,6 @@ function Collections() {
     }))
   }
 
-  // Update collection name
   const handleUpdateCollectionName = (collectionId) => {
     if (!editName.trim()) return
     setCollections(collections.map(collection => 
@@ -149,10 +138,8 @@ function Collections() {
     setEditName('')
   }
 
-  // Get favorite collections count
   const favoriteCollectionsCount = collections.filter(c => c.isFavorite).length
 
-  // Get total recipes across all collections
   const totalRecipesInCollections = collections.reduce((total, collection) => 
     total + collection.recipeIds.length, 0
   )
@@ -181,7 +168,6 @@ function Collections() {
           </button>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl border p-6">
             <div className="flex items-center justify-between">
@@ -226,7 +212,6 @@ function Collections() {
           </div>
         </div>
 
-        {/* Create Collection Modal/Form */}
         {showCreateForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-8 max-w-md w-full">
@@ -277,7 +262,6 @@ function Collections() {
           </div>
         )}
 
-        {/* Edit Collection Name Modal */}
         {editingCollection && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-8 max-w-md w-full">
@@ -330,7 +314,6 @@ function Collections() {
           </div>
         )}
 
-        {/* Collections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {collections.map((collection) => (
             <div 
@@ -384,7 +367,6 @@ function Collections() {
                   </div>
                 </div>
 
-                {/* Recipes Preview */}
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">Recipes in this collection:</h4>
                   <div className="space-y-2">
@@ -434,7 +416,6 @@ function Collections() {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3">
                   <Link 
                     to={`/collection/${collection.id}`}
@@ -457,7 +438,6 @@ function Collections() {
           ))}
         </div>
 
-        {/* Empty State */}
         {collections.length === 0 && (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 text-gray-300">

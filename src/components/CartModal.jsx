@@ -8,6 +8,16 @@ const CartModal = ({ isOpen, onClose }) => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { cartItems, updateQuantity, removeItem } = useCart();
 
+  const handleCheckoutOpen = () => {
+    setIsCheckoutOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCheckoutClose = () => {
+    setIsCheckoutOpen(false);
+    document.body.style.overflow = 'unset';
+  };
+
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
@@ -137,7 +147,7 @@ const CartModal = ({ isOpen, onClose }) => {
             
             <div className="space-y-3">
               <button 
-                onClick={() => setIsCheckoutOpen(true)}
+                onClick={handleCheckoutOpen}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
               >
                 Proceed to Checkout
@@ -156,7 +166,7 @@ const CartModal = ({ isOpen, onClose }) => {
 
       <CheckoutModal 
         isOpen={isCheckoutOpen} 
-        onClose={() => setIsCheckoutOpen(false)}
+        onClose={handleCheckoutClose}
         cartTotal={getCartTotal()}
       />
     </div>
