@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function HeroSection() {
   return (
     <section className="relative py-20 overflow-hidden">
@@ -19,9 +21,9 @@ function HeroSection() {
           </p>
           
           <div className="pt-4">
-            <button className="bg-gray-900 text-white px-6 py-3 rounded-md text-lg hover:bg-gray-800 transition-colors">
+            <Link to="/signup" className="bg-gray-900 text-white px-6 py-3 rounded-md text-lg hover:bg-gray-800 transition-colors inline-block">
               Join us!
-            </button>
+            </Link>
           </div>
         </div>
       </div>
