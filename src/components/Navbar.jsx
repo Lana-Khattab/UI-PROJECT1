@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import NotificationsModal from './NotificationsModal'
 
 function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -89,40 +91,91 @@ function Navbar() {
         setNotifications={setNotifications}
       />
       <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
         <Link to="/" className="text-2xl font-bold text-gray-900">FOODIES</Link>
-        <div className="flex-1 w-full sm:w-auto sm:mx-8">
+        <div className="hidden md:flex flex-1 mx-8">
           <input 
             type="text" 
             placeholder="ingredient, dish" 
             className="w-full max-w-sm px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" 
           />
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link to="/login" className="bg-gray-900 text-white px-3 sm:px-4 py-2 rounded-md text-sm hover:bg-gray-800">
+        <div className="hidden md:flex items-center gap-4">
+          <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800">
             Sign in
           </Link>
-          <Link to="/signup" className="border px-3 sm:px-4 py-2 rounded-md text-sm hover:bg-gray-100">
+          <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
             Register
           </Link>
         </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
-      <div className="border-t">
-        <div className="container mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-600 gap-3 sm:gap-0">
-          <div className="flex gap-4 sm:gap-6 flex-wrap">
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-white">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            <input 
+              type="text" 
+              placeholder="ingredient, dish" 
+              className="w-full px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            />
+            <div className="flex flex-col gap-2">
+              <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 text-center">
+                Sign in
+              </Link>
+              <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-center">
+                Register
+              </Link>
+            </div>
+            <div className="flex flex-col gap-3 pt-3 border-t">
+              <Link to="/" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+              <Link to="/explore" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Explore</Link>
+              <Link to="/shop" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Shop</Link>
+              <a href="#collections" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Collections</a>
+              <Link to="/dashboard" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Meal Planner</Link>
+            </div>
+            <div className="flex flex-col gap-3 pt-3 border-t">
+              <button 
+                onClick={() => {
+                  setIsNotificationsOpen(true);
+                  setIsMobileMenuOpen(false);
+                }} 
+                className="hover:text-orange-500 text-left py-2 flex items-center justify-between"
+              >
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">{unreadCount}</span>
+                )}
+              </button>
+              <Link to="/cart" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Cart</Link>
+              <Link to="/profile" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="border-t hidden md:block">
+        <div className="container mx-auto px-4 sm:px-6 py-2 flex items-center justify-between text-sm text-gray-600">
+          <div className="flex gap-6">
             <Link to="/" className="hover:text-orange-500 cursor-pointer">Home</Link>
             <Link to="/explore" className="hover:text-orange-500 cursor-pointer">Explore</Link>
+            <Link to="/shop" className="hover:text-orange-500 cursor-pointer">Shop</Link>
             <a href="#collections" className="hover:text-orange-500 cursor-pointer">Collections</a>
             <Link to="/dashboard" className="hover:text-orange-500 cursor-pointer">Meal Planner</Link>
           </div>
-          <div className="flex gap-3 sm:gap-4 flex-wrap">
+          <div className="flex gap-4">
             <button onClick={() => setIsNotificationsOpen(true)} className="hover:text-orange-500 relative pr-3">
               Notifications
               {unreadCount > 0 && (
                 <span className="absolute -top-1.5 right-0 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">{unreadCount}</span>
               )}
             </button>
-            <button className="hover:text-orange-500">Cart</button>
+            <Link to="/cart" className="hover:text-orange-500">Cart</Link>
             <Link to="/profile" className="hover:text-orange-500">Profile</Link>
           </div>
         </div>
