@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
+
 import Home from './pages/Home'
 import Explore from './pages/Explore'
 import Profile from './pages/Profile'
@@ -7,9 +9,12 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import AddRecipe from './pages/AddRecipe'
 import RecipeDetails from './pages/RecipeDetails'
+
+import Collections from './pages/Collections'
+import CollectionDetail from './pages/CollectionDetail'
+
 import Shop from './pages/Shop'
 import Cart from './pages/Cart'
-import { CartProvider } from './context/CartContext'
 
 function App() {
   return (
@@ -26,10 +31,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/recipe/:id" element={<RecipeDetails />} />
-        </Routes>
-      </Router>
-    </CartProvider>
-  )
-}
 
-export default App
+          {/* Collections */}
+          <Route path="/collections" element={<Collections />} />
+          <Route path="/collection/:id" element={<CollectionDetail />} />
+        </Routes>
+      </Router

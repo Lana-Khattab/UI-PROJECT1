@@ -1,9 +1,39 @@
 import { useParams, Link } from 'react-router-dom'
 import recipes from '../data/recipes.json'
+import { useState, useEffect } from 'react'
 
 function RecipeDetails() {
   const { id } = useParams()
   const recipe = recipes.find(r => String(r.id) === String(id))
+  const [collections, setCollections] = useState([])
+  const [showCollectionDropdown, setShowCollectionDropdown] = useState(false)
+
+  // Load collections from localStorage
+  useEffect(() => {
+    const savedCollections = localStorage.getItem('recipe-collections')
+    if (savedCollections) {
+      setCollections(JSON.parse(savedCollections))
+    }
+  }, [])
+
+  // Add recipe to collection
+  const addToCollection = (collectionId) => {
+    const updatedCollections = collections.map(collection => {
+      if (collection.id === collectionId && !collection.recipeIds.includes(parseInt(id))) {
+        return { ...collection, recipeIds: [...collection.recipeIds, parseInt(id)] }
+      }
+      return collection
+    })
+    setCollections(updatedCollections)
+    localStorage.setItem('recipe-collections', JSON.stringify(updatedCollections))
+    setShowCollectionDropdown(false)
+  }
+
+  // Check if recipe is already in a collection
+  const isInCollection = (collectionId) => {
+    const collection = collections.find(c => c.id === collectionId)
+    return collection ? collection.recipeIds.includes(parseInt(id)) : false
+  }
 
   if (!recipe) {
     return (
@@ -99,6 +129,68 @@ function RecipeDetails() {
           <div className="flex gap-3 w-full md:w-auto">
             <button className="bg-gray-900 text-white px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-800">Favorited</button>
             <button className="border border-gray-900 text-gray-900 px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-50">Add to Meal Plan</button>
+            
+            {/* Add to Collection Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowCollectionDropdown(!showCollectionDropdown)}
+                className="border border-gray-900 text-gray-900 px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-50 flex items-center gap-2"
+              >
+                Add to Collection
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {showCollectionDropdown && (
+                <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-10">
+                  <div className="p-3 border-b">
+                    <p className="text-sm font-medium text-gray-900">Save to Collection</p>
+                    <p className="text-xs text-gray-500 mt-1">Add this recipe to a collection</p>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {collections.length === 0 ? (
+                      <div className="p-3 text-center">
+                        <p className="text-sm text-gray-500">No collections yet</p>
+                      </div>
+                    ) : (
+                      collections.map((collection) => (
+                        <button
+                          key={collection.id}
+                          onClick={() => addToCollection(collection.id)}
+                          disabled={isInCollection(collection.id)}
+                          className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                            isInCollection(collection.id) ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${collection.color.replace('bg-', 'bg-').split(' ')[0]}`}></div>
+                            <span>{collection.name}</span>
+                          </div>
+                          {isInCollection(collection.id) && (
+                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  <div className="border-t">
+                    <Link 
+                      to="/collections" 
+                      onClick={() => setShowCollectionDropdown(false)}
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create new collection
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
