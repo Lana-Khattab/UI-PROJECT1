@@ -2,8 +2,17 @@ import Navbar from '../components/Navbar'
 import HeroSection from '../components/HeroSection'
 import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 function Home() {
+  const [favorites, setFavorites] = useState([2, 4])
+
+  const toggleFavorite = (id) => {
+    setFavorites(prev => 
+      prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
+    )
+  }
+
   const topRecipes = [
     {
       title: 'Classic Margherita Pizza',
@@ -41,8 +50,7 @@ function Home() {
       servings: 6,
       rating: 4.9,
       image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80',
-      tags: ['Indian', 'Curry', 'Spicy'],
-      isFavorite: true
+      tags: ['Indian', 'Curry', 'Spicy']
     },
     {
       id: 3,
@@ -62,8 +70,7 @@ function Home() {
       servings: 4,
       rating: 4.7,
       image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80',
-      tags: ['Mexican', 'Tacos', 'Quick'],
-      isFavorite: true
+      tags: ['Mexican', 'Tacos', 'Quick']
     },
     {
       id: 5,
@@ -178,8 +185,11 @@ function Home() {
                             {recipe.title}
                           </h3>
                         </Link>
-                        <button className={`h-8 w-8 p-0 ${recipe.isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
-                          <svg className={`h-4 w-4 ${recipe.isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button 
+                          onClick={() => toggleFavorite(recipe.id)}
+                          className={`h-8 w-8 p-0 ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                        >
+                          <svg className={`h-4 w-4 ${favorites.includes(recipe.id) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
                         </button>

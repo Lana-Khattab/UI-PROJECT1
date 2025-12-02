@@ -1,7 +1,79 @@
 import Navbar from '../components/Navbar'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 function AddRecipe() {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    imageUrl: '',
+    cuisine: '',
+    difficulty: 'easy',
+    cookTime: 30,
+    servings: 4,
+    calories: '',
+    protein: '',
+    carbs: '',
+    fat: ''
+  })
+  
+  const [selectedMealTypes, setSelectedMealTypes] = useState([])
+  const [selectedDiets, setSelectedDiets] = useState([])
+  const [ingredients, setIngredients] = useState([])
+  const [currentIngredient, setCurrentIngredient] = useState('')
+  const [instructions, setInstructions] = useState([''])
+
+  const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack']
+  const diets = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 'Pescatarian', 'Dairy-Free']
+
+  const toggleMealType = (type) => {
+    setSelectedMealTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    )
+  }
+
+  const toggleDiet = (diet) => {
+    setSelectedDiets(prev => 
+      prev.includes(diet) ? prev.filter(d => d !== diet) : [...prev, diet]
+    )
+  }
+
+  const addIngredient = () => {
+    if (currentIngredient.trim()) {
+      setIngredients([...ingredients, currentIngredient])
+      setCurrentIngredient('')
+    }
+  }
+
+  const removeIngredient = (index) => {
+    setIngredients(ingredients.filter((_, i) => i !== index))
+  }
+
+  const addInstruction = () => {
+    setInstructions([...instructions, ''])
+  }
+
+  const updateInstruction = (index, value) => {
+    const updated = [...instructions]
+    updated[index] = value
+    setInstructions(updated)
+  }
+
+  const removeInstruction = (index) => {
+    setInstructions(instructions.filter((_, i) => i !== index))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log({
+      ...formData,
+      mealTypes: selectedMealTypes,
+      diets: selectedDiets,
+      ingredients,
+      instructions: instructions.filter(i => i.trim())
+    })
+  }
+
   return (
     <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
       <Navbar />
@@ -17,7 +89,7 @@ function AddRecipe() {
         <h2 className="text-3xl font-bold mb-2">Create New Recipe</h2>
         <p className="text-gray-600 mb-8">Share your culinary creation with the Foodies community</p>
 
-        <form className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
           <section className="bg-white rounded-xl border p-8">
             <h3 className="text-xl font-semibold mb-6">Basic Information</h3>
             <div className="grid gap-6">
@@ -26,6 +98,8 @@ function AddRecipe() {
                 <input 
                   type="text" 
                   placeholder="e.g., Creamy Garlic Pasta"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
@@ -35,6 +109,8 @@ function AddRecipe() {
                 <textarea 
                   placeholder="Describe your recipe..." 
                   rows="4"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 ></textarea>
               </div>
@@ -44,6 +120,8 @@ function AddRecipe() {
                 <input 
                   type="text" 
                   placeholder="https://example.com/image.jpg"
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
@@ -51,7 +129,11 @@ function AddRecipe() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block font-medium mb-2">Cuisine *</label>
-                  <select className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  <select 
+                    value={formData.cuisine}
+                    onChange={(e) => setFormData({...formData, cuisine: e.target.value})}
+                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
                     <option value="">Select cuisine</option>
                     <option value="italian">Italian</option>
                     <option value="egyptian">Egyptian</option>
@@ -72,7 +154,11 @@ function AddRecipe() {
                 </div>
                 <div>
                   <label className="block font-medium mb-2">Difficulty</label>
-                  <select className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  <select 
+                    value={formData.difficulty}
+                    onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                    className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
                     <option value="easy">Easy</option>
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
@@ -85,7 +171,8 @@ function AddRecipe() {
                   <label className="block font-medium mb-2">Cook Time (minutes)</label>
                   <input 
                     type="number" 
-                    defaultValue="30"
+                    value={formData.cookTime}
+                    onChange={(e) => setFormData({...formData, cookTime: e.target.value})}
                     className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                   />
                 </div>
@@ -93,7 +180,8 @@ function AddRecipe() {
                   <label className="block font-medium mb-2">Servings</label>
                   <input 
                     type="number" 
-                    defaultValue="4"
+                    value={formData.servings}
+                    onChange={(e) => setFormData({...formData, servings: e.target.value})}
                     className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                   />
                 </div>
@@ -107,23 +195,38 @@ function AddRecipe() {
             <div className="mb-8">
               <label className="block font-medium mb-3">Meal Type *</label>
               <div className="flex flex-wrap gap-2">
-                <span className="px-4 py-2 border rounded-full cursor-pointer hover:bg-gray-100 transition-colors text-sm">Breakfast</span>
-                <span className="px-4 py-2 border rounded-full cursor-pointer hover:bg-gray-100 transition-colors text-sm">Lunch</span>
-                <span className="px-4 py-2 border rounded-full cursor-pointer hover:bg-gray-100 transition-colors text-sm">Dinner</span>
-                <span className="px-4 py-2 border rounded-full cursor-pointer hover:bg-gray-100 transition-colors text-sm">Dessert</span>
-                <span className="px-4 py-2 border rounded-full cursor-pointer hover:bg-gray-100 transition-colors text-sm">Snack</span>
+                {mealTypes.map((type) => (
+                  <span 
+                    key={type}
+                    onClick={() => toggleMealType(type)}
+                    className={`px-4 py-2 border rounded-full cursor-pointer transition-colors text-sm ${
+                      selectedMealTypes.includes(type) 
+                        ? 'bg-orange-500 text-white border-orange-500' 
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    {type}
+                  </span>
+                ))}
               </div>
             </div>
 
             <div>
               <label className="block font-medium mb-3">Diet</label>
               <div className="flex flex-wrap gap-2">
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Vegetarian</span>
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Vegan</span>
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Gluten-Free</span>
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Keto</span>
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Pescatarian</span>
-                <span className="px-4 py-2 border rounded-full hover:bg-gray-100 cursor-pointer transition-colors text-sm">Dairy-Free</span>
+                {diets.map((diet) => (
+                  <span 
+                    key={diet}
+                    onClick={() => toggleDiet(diet)}
+                    className={`px-4 py-2 border rounded-full cursor-pointer transition-colors text-sm ${
+                      selectedDiets.includes(diet) 
+                        ? 'bg-orange-500 text-white border-orange-500' 
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    {diet}
+                  </span>
+                ))}
               </div>
             </div>
           </section>
@@ -135,31 +238,71 @@ function AddRecipe() {
                 <input 
                   type="text" 
                   placeholder="e.g., 2 cups all-purpose flour"
+                  value={currentIngredient}
+                  onChange={(e) => setCurrentIngredient(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addIngredient())}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
                 <button 
-                  type="button" 
+                  type="button"
+                  onClick={addIngredient}
                   className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 whitespace-nowrap text-sm"
                 >
                   + Add
                 </button>
               </div>
+              {ingredients.length > 0 && (
+                <ul className="space-y-2 mt-4">
+                  {ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-md">
+                      <span className="text-sm">{ingredient}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeIngredient(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
 
           <section className="bg-white rounded-xl border p-8">
             <h3 className="text-xl font-semibold mb-6">Instructions *</h3>
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <span className="bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full text-sm min-w-[2rem] text-center">1</span>
-                <textarea 
-                  placeholder="Describe the first step..." 
-                  rows="2"
-                  className="flex-1 border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                ></textarea>
-              </div>
+              {instructions.map((instruction, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <span className="bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full text-sm min-w-[2rem] text-center">
+                    {index + 1}
+                  </span>
+                  <textarea 
+                    placeholder={`Describe step ${index + 1}...`}
+                    value={instruction}
+                    onChange={(e) => updateInstruction(index, e.target.value)}
+                    rows="2"
+                    className="flex-1 border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  ></textarea>
+                  {instructions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeInstruction(index)}
+                      className="text-red-500 hover:text-red-700 mt-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
               <button 
-                type="button" 
+                type="button"
+                onClick={addInstruction}
                 className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm"
               >
                 + Add Step
@@ -175,6 +318,8 @@ function AddRecipe() {
                 <input 
                   type="number" 
                   placeholder="0"
+                  value={formData.calories}
+                  onChange={(e) => setFormData({...formData, calories: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
@@ -183,6 +328,8 @@ function AddRecipe() {
                 <input 
                   type="number" 
                   placeholder="0"
+                  value={formData.protein}
+                  onChange={(e) => setFormData({...formData, protein: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
@@ -191,6 +338,8 @@ function AddRecipe() {
                 <input 
                   type="number" 
                   placeholder="0"
+                  value={formData.carbs}
+                  onChange={(e) => setFormData({...formData, carbs: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
@@ -199,6 +348,8 @@ function AddRecipe() {
                 <input 
                   type="number" 
                   placeholder="0"
+                  value={formData.fat}
+                  onChange={(e) => setFormData({...formData, fat: e.target.value})}
                   className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                 />
               </div>
