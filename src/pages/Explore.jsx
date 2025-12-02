@@ -1,14 +1,22 @@
 import Navbar from '../components/Navbar'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 
 function Explore() {
+  const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCuisine, setSelectedCuisine] = useState('All')
   const [selectedDiet, setSelectedDiet] = useState('All')
   const [selectedMealType, setSelectedMealType] = useState('All')
   const [activeTab, setActiveTab] = useState('all')
   const [favorites, setFavorites] = useState([2, 4, 6, 8])
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam === 'favorites') {
+      setActiveTab('favorites')
+    }
+  }, [searchParams])
 
   const toggleFavorite = (id) => {
     setFavorites(prev => 
