@@ -3,6 +3,7 @@ import HeroSection from '../components/HeroSection'
 import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import recipes from '../data/recipes.json'
 
 function Home() {
   const [favorites, setFavorites] = useState([2, 4])
@@ -13,86 +14,9 @@ function Home() {
     )
   }
 
-  const topRecipes = [
-    {
-      title: 'Classic Margherita Pizza',
-      chef: 'Chef Mario',
-      image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80'
-    },
-    {
-      title: 'Chicken Tikka Masala',
-      chef: 'Chef Priya',
-      image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80'
-    },
-    {
-      title: 'Spaghetti Carbonara',
-      chef: 'Chef Antonio',
-      image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800&q=80'
-    }
-  ]
+  const topRecipes = recipes.slice(0, 3)
 
-  const recommendedRecipes = [
-    {
-      id: 1,
-      title: 'Classic Margherita Pizza',
-      chef: 'Chef Mario',
-      time: 25,
-      servings: 4,
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
-      tags: ['Italian', 'Pizza', 'Vegetarian']
-    },
-    {
-      id: 2,
-      title: 'Chicken Tikka Masala',
-      chef: 'Chef Priya',
-      time: 35,
-      servings: 6,
-      rating: 4.9,
-      image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80',
-      tags: ['Indian', 'Curry', 'Spicy']
-    },
-    {
-      id: 3,
-      title: 'Caesar Salad',
-      chef: 'Chef Julia',
-      time: 15,
-      servings: 4,
-      rating: 4.6,
-      image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=800&q=80',
-      tags: ['Salad', 'Quick', 'Easy']
-    },
-    {
-      id: 4,
-      title: 'Beef Tacos',
-      chef: 'Chef Carlos',
-      time: 20,
-      servings: 4,
-      rating: 4.7,
-      image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80',
-      tags: ['Mexican', 'Tacos', 'Quick']
-    },
-    {
-      id: 5,
-      title: 'Pad Thai',
-      chef: 'Chef Somchai',
-      time: 25,
-      servings: 4,
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=800&q=80',
-      tags: ['Thai', 'Noodles', 'Asian']
-    },
-    {
-      id: 6,
-      title: 'Greek Salad',
-      chef: 'Chef Dimitri',
-      time: 10,
-      servings: 4,
-      rating: 4.5,
-      image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&q=80',
-      tags: ['Greek', 'Salad', 'Healthy']
-    }
-  ]
+  const recommendedRecipes = recipes
 
   const cuisines = [
     { name: 'Italian', count: 150 },
@@ -150,9 +74,9 @@ function Home() {
             <section>
               <h2 className="mb-4">Top Recipes</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {topRecipes.map((recipe, index) => (
-                  <div key={index} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
-                    <Link to="/recipe/1">
+                {topRecipes.map((recipe) => (
+                  <div key={recipe.id} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
+                    <Link to={`/recipe/${recipe.id}`}>
                       <div 
                         className="h-32 bg-cover bg-center"
                         style={{backgroundImage: `url('${recipe.image}')`}}
