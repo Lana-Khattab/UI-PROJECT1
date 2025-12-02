@@ -1,6 +1,21 @@
 import Navbar from '../components/Navbar'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function Explore() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCuisine, setSelectedCuisine] = useState('All')
+  const [selectedDiet, setSelectedDiet] = useState('All')
+  const [selectedMealType, setSelectedMealType] = useState('All')
+  const [activeTab, setActiveTab] = useState('all')
+  const [favorites, setFavorites] = useState([2, 4, 6, 8])
+
+  const toggleFavorite = (id) => {
+    setFavorites(prev => 
+      prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
+    )
+  }
+
   const recipes = [
     {
       id: 1,
@@ -12,7 +27,7 @@ function Explore() {
       cuisine: 'Italian',
       tags: ['Vegetarian'],
       cost: 8,
-      isFavorite: false
+      mealType: 'Dinner'
     },
     {
       id: 2,
@@ -24,7 +39,7 @@ function Explore() {
       cuisine: 'Mediterranean',
       tags: ['Vegan'],
       cost: 12,
-      isFavorite: true
+      mealType: 'Lunch'
     },
     {
       id: 3,
@@ -36,7 +51,7 @@ function Explore() {
       cuisine: 'American',
       tags: ['Vegetarian'],
       cost: 9,
-      isFavorite: false
+      mealType: 'Breakfast'
     },
     {
       id: 4,
@@ -48,7 +63,7 @@ function Explore() {
       cuisine: 'American',
       tags: ['Keto'],
       cost: 15,
-      isFavorite: true
+      mealType: 'Dinner'
     },
     {
       id: 5,
@@ -60,7 +75,7 @@ function Explore() {
       cuisine: 'French',
       tags: ['Vegetarian'],
       cost: 10,
-      isFavorite: false
+      mealType: 'Dessert'
     },
     {
       id: 6,
@@ -72,7 +87,7 @@ function Explore() {
       cuisine: 'Japanese',
       tags: ['Pescatarian'],
       cost: 25,
-      isFavorite: true
+      mealType: 'Dinner'
     },
     {
       id: 7,
@@ -84,7 +99,7 @@ function Explore() {
       cuisine: 'Indian',
       tags: ['Vegan'],
       cost: 11,
-      isFavorite: false
+      mealType: 'Lunch'
     },
     {
       id: 8,
@@ -96,9 +111,22 @@ function Explore() {
       cuisine: 'Italian',
       tags: ['Vegetarian'],
       cost: 13,
-      isFavorite: true
+      mealType: 'Dinner'
     }
   ]
+
+  const filteredRecipes = recipes.filter(recipe => {
+    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         recipe.cuisine.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    
+    const matchesCuisine = selectedCuisine === 'All' || recipe.cuisine === selectedCuisine
+    const matchesDiet = selectedDiet === 'All' || recipe.tags.includes(selectedDiet)
+    const matchesMealType = selectedMealType === 'All' || recipe.mealType === selectedMealType
+    const matchesTab = activeTab === 'all' || (activeTab === 'favorites' && favorites.includes(recipe.id))
+
+    return matchesSearch && matchesCuisine && matchesDiet && matchesMealType && matchesTab
+  })
 
   return (
     <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
@@ -111,6 +139,8 @@ function Explore() {
           <input 
             type="text" 
             placeholder="Search recipes, ingredients, or keywords..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" 
           />
         </div>
@@ -123,7 +153,11 @@ function Explore() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm text-gray-600 mb-2 block">Cuisine</label>
-              <select className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <select 
+                value={selectedCuisine}
+                onChange={(e) => setSelectedCuisine(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
                 <option>All</option>
                 <option>Italian</option>
                 <option>American</option>
@@ -136,7 +170,11 @@ function Explore() {
 
             <div>
               <label className="text-sm text-gray-600 mb-2 block">Diet</label>
-              <select className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <select 
+                value={selectedDiet}
+                onChange={(e) => setSelectedDiet(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
                 <option>All</option>
                 <option>Vegetarian</option>
                 <option>Vegan</option>
@@ -148,7 +186,11 @@ function Explore() {
 
             <div>
               <label className="text-sm text-gray-600 mb-2 block">Meal Type</label>
-              <select className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <select 
+                value={selectedMealType}
+                onChange={(e) => setSelectedMealType(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
                 <option>All</option>
                 <option>Breakfast</option>
                 <option>Lunch</option>
@@ -161,31 +203,47 @@ function Explore() {
 
         <div className="mb-6">
           <div className="flex gap-4 border-b">
-            <button className="px-4 py-2 font-medium text-orange-500 border-b-2 border-orange-500">All Recipes</button>
-            <button className="px-4 py-2 font-medium text-gray-600 hover:text-orange-500">My Favorites</button>
+            <button 
+              onClick={() => setActiveTab('all')}
+              className={`px-4 py-2 font-medium ${activeTab === 'all' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-orange-500'}`}
+            >
+              All Recipes
+            </button>
+            <button 
+              onClick={() => setActiveTab('favorites')}
+              className={`px-4 py-2 font-medium ${activeTab === 'favorites' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-orange-500'}`}
+            >
+              My Favorites ({favorites.length})
+            </button>
           </div>
         </div>
 
-        <div className="mb-4 text-gray-600">Showing {recipes.length} recipes</div>
+        <div className="mb-4 text-gray-600">Showing {filteredRecipes.length} recipes</div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {recipes.map((recipe) => (
+          {filteredRecipes.map((recipe) => (
             <div key={recipe.id} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
-              <a href={`/recipe/${recipe.id}`}>
+              <Link to={`/recipe/${recipe.id}`}>
                 <div className="relative">
                   <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
                   <span className="absolute top-2 left-2 bg-white px-2 py-1 rounded-full text-xs font-medium">{recipe.difficulty}</span>
-                  <button className="absolute top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-100">
-                    <svg className={`w-5 h-5 ${recipe.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      toggleFavorite(recipe.id)
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-100"
+                  >
+                    <svg className={`w-5 h-5 ${favorites.includes(recipe.id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </button>
                 </div>
-              </a>
+              </Link>
               <div className="p-4">
-                <a href={`/recipe/${recipe.id}`}>
+                <Link to={`/recipe/${recipe.id}`}>
                   <h3 className="font-semibold mb-2 hover:text-orange-500 transition-colors">{recipe.title}</h3>
-                </a>
+                </Link>
                 <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                   <div className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

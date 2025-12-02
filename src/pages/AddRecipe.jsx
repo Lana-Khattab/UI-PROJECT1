@@ -31,7 +31,7 @@ function AddRecipe() {
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     )
   }
-
+                                                                                                                        
   const toggleDiet = (diet) => {
     setSelectedDiets(prev => 
       prev.includes(diet) ? prev.filter(d => d !== diet) : [...prev, diet]
