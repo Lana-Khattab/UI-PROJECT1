@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import useRandomRecipe from '../utils/useRandomRecipe'
 
 function Sidebar() {
+  const goRandom = useRandomRecipe()
+
   return (
     <aside className="lg:col-span-3 space-y-4">
       <div className="bg-white rounded-xl border p-6">
@@ -12,7 +15,7 @@ function Sidebar() {
         </div>
 
         <div className="space-y-2 mb-6">
-          <button className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm hover:bg-gray-100 flex items-center justify-start gap-2">
+          <button onClick={goRandom} className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm hover:bg-gray-100 flex items-center justify-start gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
             </svg>
