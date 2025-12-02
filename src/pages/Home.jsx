@@ -121,7 +121,7 @@ function Home() {
                         <span className="font-semibold">Owen</span>
                         <span className="text-gray-600"> shared a new recipe</span>
                       </p>
-                      <p className="text-sm text-gray-500">2 hours ago</p>
+                      <p className="text-sm text-gray-500">2 hours ago</p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
