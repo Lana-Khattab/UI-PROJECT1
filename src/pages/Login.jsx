@@ -1,6 +1,31 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    const result = await login(email, password)
+    
+    if (result.success) {
+      navigate('/')
+    } else {
+      setError(result.error)
+    }
+    
+    setLoading(false)
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 text-gray-800 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -26,13 +51,22 @@ function Login() {
           <div className="h-px w-full bg-gray-200" />
         </div>
 
-        <form className="space-y-4">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">Email address</label>
             <input 
               id="email" 
               type="email" 
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none" 
             />
           </div>
@@ -43,6 +77,9 @@ function Login() {
               id="password" 
               type="password" 
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none" 
             />
           </div>
@@ -57,9 +94,10 @@ function Login() {
 
           <button 
             type="submit" 
-            className="mt-2 w-full rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+            disabled={loading}
+            className="mt-2 w-full rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 

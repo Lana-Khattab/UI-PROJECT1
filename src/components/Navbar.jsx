@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import NotificationsModal from './NotificationsModal'
 import CartModal from './CartModal'
 
 function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth()
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -107,12 +109,26 @@ function Navbar() {
           />
         </div>
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800">
-            Sign in
-          </Link>
-          <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
-            Register
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-gray-600">Hi, {user?.name}</span>
+              <button 
+                onClick={logout}
+                className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800">
+                Sign in
+              </Link>
+              <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
+                Register
+              </Link>
+            </>
+          )}
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -131,12 +147,29 @@ function Navbar() {
               className="w-full px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
             <div className="flex flex-col gap-2">
-              <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 text-center">
-                Sign in
-              </Link>
-              <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-center">
-                Register
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <span className="text-sm text-gray-600 px-4 py-2">Hi, {user?.name}</span>
+                  <button 
+                    onClick={() => {
+                      logout()
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-center"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 text-center">
+                    Sign in
+                  </Link>
+                  <Link to="/signup" className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 text-center">
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
             <div className="flex flex-col gap-3 pt-3 border-t">
               <Link to="/" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
