@@ -37,7 +37,7 @@ function Cart() {
         <div className="mb-6">
           <Link to="/shop" className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 mb-4">
             <ArrowLeft className="w-5 h-5" />
-            <span>Continue Shopping</span>
+            <span>Continue Shopping</span> 
           </Link>
           <div className="flex items-center gap-3">
             <ShoppingBag className="w-8 h-8 text-orange-500" />
@@ -56,7 +56,7 @@ function Cart() {
                 <p className="text-gray-500 text-xl mb-2">Your cart is empty</p>
                 <p className="text-gray-400 mb-6">Add some kitchen essentials to get started!</p>
                 <Link 
-                  to="/" 
+                  to="/shop" 
                   className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
                 >
                   Browse Products

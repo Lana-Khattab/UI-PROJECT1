@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, CreditCard, Truck, CheckCircle } from 'lucide-react';
 
-const CheckoutModal = ({ isOpen, onClose, cartTotal }) => {
+const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -31,6 +31,9 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setStep(2);
+    if (onOrderComplete) {
+      onOrderComplete();
+    }
   };
 
   const handleConfirm = () => {

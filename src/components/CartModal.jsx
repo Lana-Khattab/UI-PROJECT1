@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 
 const CartModal = ({ isOpen, onClose }) => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const { cartItems, updateQuantity, removeItem } = useCart();
+  const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
 
   const handleCheckoutOpen = () => {
     setIsCheckoutOpen(true);
@@ -168,6 +168,7 @@ const CartModal = ({ isOpen, onClose }) => {
         isOpen={isCheckoutOpen} 
         onClose={handleCheckoutClose}
         cartTotal={getCartTotal()}
+        onOrderComplete={clearCart}
       />
     </div>
   );
