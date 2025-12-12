@@ -1,8 +1,18 @@
 import Navbar from '../components/Navbar'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { recipeAPI } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 function AddRecipe() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login')
+    }
+  }, [user, navigate])
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -22,6 +32,8 @@ function AddRecipe() {
   const [ingredients, setIngredients] = useState([])
   const [currentIngredient, setCurrentIngredient] = useState('')
   const [instructions, setInstructions] = useState([''])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack']
   const diets = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 'Pescatarian', 'Dairy-Free']
@@ -63,15 +75,76 @@ function AddRecipe() {
     setInstructions(instructions.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log({
-      ...formData,
-      mealTypes: selectedMealTypes,
-      diets: selectedDiets,
-      ingredients,
-      instructions: instructions.filter(i => i.trim())
-    })
+    setError('')
+    
+    console.log('Form submitted')
+    console.log('FormData:', formData)
+    console.log('Ingredients:', ingredients)
+    console.log('Instructions:', instructions)
+    console.log('Selected meal types:', selectedMealTypes)
+
+    if (!formData.title || !formData.description || !formData.cuisine) {
+      setError('Please fill in all required fields')
+      console.log('Missing required fields')
+      return
+    }
+
+    if (ingredients.length === 0) {
+      setError('Please add at least one ingredient')
+      return
+    }
+
+    const validInstructions = instructions.filter(i => i.trim())
+    if (validInstructions.length === 0) {
+      setError('Please add at least one instruction')
+      return
+    }
+
+    if (selectedMealTypes.length === 0) {
+      setError('Please select at least one meal type')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      console.log('Starting API call...')
+
+      const recipeData = {
+        title: formData.title,
+        image: formData.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image',
+        time: parseInt(formData.cookTime),
+        servings: parseInt(formData.servings),
+        ingredients,
+        instructions: validInstructions,
+        nutrition: {
+          calories: parseInt(formData.calories) || 0,
+          protein: formData.protein ? `${formData.protein}g` : '0g',
+          carbs: formData.carbs ? `${formData.carbs}g` : '0g',
+          fat: formData.fat ? `${formData.fat}g` : '0g'
+        },
+        tags: [...selectedMealTypes, ...selectedDiets],
+        difficulty: formData.difficulty,
+        cuisine: formData.cuisine
+      }
+
+      console.log('Recipe data to send:', recipeData)
+
+      const response = await recipeAPI.create(recipeData)
+      console.log('Response received:', response)
+
+      if (response.data.success) {
+        console.log('Recipe created successfully, navigating...')
+        navigate(`/recipe/${response.data.recipe._id}`)
+      }
+    } catch (err) {
+      console.error('Error creating recipe:', err)
+      console.error('Error response:', err.response)
+      setError(err.response?.data?.message || 'Failed to create recipe. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -88,6 +161,12 @@ function AddRecipe() {
 
         <h2 className="text-3xl font-bold mb-2">Create New Recipe</h2>
         <p className="text-gray-600 mb-8">Share your culinary creation with the Foodies community</p>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <section className="bg-white rounded-xl border p-8">
@@ -365,9 +444,10 @@ function AddRecipe() {
             </Link>
             <button 
               type="submit" 
-              className="bg-gray-900 text-white px-16 py-4 rounded-md hover:bg-gray-800 transition-colors text-sm font-medium"
+              disabled={isSubmitting}
+              className="bg-gray-900 text-white px-16 py-4 rounded-md hover:bg-gray-800 transition-colors text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Publish Recipe
+              {isSubmitting ? 'Publishing...' : 'Publish Recipe'}
             </button>
           </div>
         </form>

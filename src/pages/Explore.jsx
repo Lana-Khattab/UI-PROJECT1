@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { recipeAPI, userAPI } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
+import recipesJson from '../data/recipes.json'
 
 function Explore() {
   const [searchParams] = useSearchParams()
@@ -38,10 +39,25 @@ function Explore() {
 
   const loadRecipes = async () => {
     try {
-      const response = await recipeAPI.getAll()
-      if (response.data.success) {
-        setRecipes(response.data.recipes)
+      let allRecipes = []
+      
+      try {
+        const response = await recipeAPI.getAll()
+        if (response.data.success) {
+          allRecipes = response.data.recipes
+        }
+      } catch (error) {
+        console.log('Could not fetch recipes from backend:', error)
       }
+      
+      const localRecipes = recipesJson.map(recipe => ({
+        ...recipe,
+        _id: recipe.id
+      }))
+      
+      allRecipes = [...allRecipes, ...localRecipes]
+      
+      setRecipes(allRecipes)
     } catch (error) {
       console.error('Error loading recipes:', error)
     } finally {
@@ -80,13 +96,15 @@ function Explore() {
   }
 
   const filteredRecipes = recipes.filter(recipe => {
+    const recipeTags = recipe.tags || []
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                         recipeTags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     
-    const matchesCuisine = selectedCuisine === 'All' || recipe.tags.includes(selectedCuisine)
-    const matchesDiet = selectedDiet === 'All' || recipe.tags.includes(selectedDiet)
-    const matchesMealType = selectedMealType === 'All' || recipe.tags.includes(selectedMealType)
-    const matchesTab = activeTab === 'all' || (activeTab === 'favorites' && favorites.includes(recipe._id))
+    const matchesCuisine = selectedCuisine === 'All' || recipeTags.includes(selectedCuisine)
+    const matchesDiet = selectedDiet === 'All' || recipeTags.includes(selectedDiet)
+    const matchesMealType = selectedMealType === 'All' || recipeTags.includes(selectedMealType)
+    const recipeId = recipe._id || recipe.id
+    const matchesTab = activeTab === 'all' || (activeTab === 'favorites' && favorites.includes(recipeId))
 
     return matchesSearch && matchesCuisine && matchesDiet && matchesMealType && matchesTab
   })
@@ -195,29 +213,31 @@ function Explore() {
         <div className="mb-4 text-gray-600">Showing {filteredRecipes.length} recipes</div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredRecipes.map((recipe) => (
-            <div key={recipe._id} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
-              <Link to={`/recipe/${recipe._id}`}>
-                <div className="relative">
-                  <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
-                  <span className="absolute top-2 left-2 bg-white px-2 py-1 rounded-full text-xs font-medium">{recipe.difficulty || 'Medium'}</span>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault()
-                      toggleFavorite(recipe._id)
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-100"
-                  >
-                    <svg className={`w-5 h-5 ${favorites.includes(recipe._id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </button>
-                </div>
-              </Link>
-              <div className="p-4">
-                <Link to={`/recipe/${recipe._id}`}>
-                  <h3 className="font-semibold mb-2 hover:text-orange-500 transition-colors">{recipe.title}</h3>
+          {filteredRecipes.map((recipe) => {
+            const recipeId = recipe._id || recipe.id
+            return (
+              <div key={recipeId} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
+                <Link to={`/recipe/${recipeId}`}>
+                  <div className="relative">
+                    <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+                    <span className="absolute top-2 left-2 bg-white px-2 py-1 rounded-full text-xs font-medium">{recipe.difficulty || 'Medium'}</span>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        toggleFavorite(recipeId)
+                      }}
+                      className="absolute top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-100"
+                    >
+                      <svg className={`w-5 h-5 ${favorites.includes(recipeId) ? 'text-red-500 fill-current' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </button>
+                  </div>
                 </Link>
+                <div className="p-4">
+                  <Link to={`/recipe/${recipeId}`}>
+                    <h3 className="font-semibold mb-2 hover:text-orange-500 transition-colors">{recipe.title}</h3>
+                  </Link>
                 <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                   <div className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,13 +251,14 @@ function Explore() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {recipe.tags.slice(0, 3).map((tag, index) => (
+                  {(recipe.tags || []).slice(0, 3).map((tag, index) => (
                     <span key={index} className="text-xs px-2 py-1 bg-gray-100 rounded-full">{tag}</span>
                   ))}
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

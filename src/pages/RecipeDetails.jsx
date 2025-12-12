@@ -1,13 +1,49 @@
 import { useParams, Link } from 'react-router-dom'
-import recipes from '../data/recipes.json'
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import { recipeAPI } from '../utils/api'
+import recipesJson from '../data/recipes.json'
 
 function RecipeDetails() {
   const { id } = useParams()
-  const recipe = recipes.find(r => String(r.id) === String(id))
+  const [recipe, setRecipe] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [collections, setCollections] = useState([])
   const [showCollectionDropdown, setShowCollectionDropdown] = useState(false)
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        setLoading(true)
+        
+        let foundRecipe = null
+        
+        try {
+          const response = await recipeAPI.getById(id)
+          if (response.data.success) {
+            foundRecipe = response.data.recipe
+          }
+        } catch (apiError) {
+          console.log('Recipe not found in backend API')
+        }
+        
+        if (!foundRecipe) {
+          const localRecipe = recipesJson.find(r => String(r.id) === String(id))
+          if (localRecipe) {
+            foundRecipe = localRecipe
+          }
+        }
+        
+        setRecipe(foundRecipe)
+      } catch (error) {
+        console.error('Error fetching recipe:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRecipe()
+  }, [id])
 
   useEffect(() => {
     const savedCollections = localStorage.getItem('recipe-collections')
@@ -33,14 +69,27 @@ function RecipeDetails() {
     return collection ? collection.recipeIds.includes(parseInt(id)) : false
   }
 
+  if (loading) {
+    return (
+      <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-6 py-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading recipe...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!recipe) {
     return (
       <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
+        <Navbar />
         <div className="container mx-auto px-6 py-12">
           <h2 className="text-2xl font-semibold">Recipe not found</h2>
           <p className="text-sm text-gray-600 mt-2">No recipe matches the id `{id}`.</p>
           <div className="mt-4">
-            <Link to="/" className="text-orange-500 hover:underline">Back home</Link>
+            <Link to="/" className="text-orange-500 hover:underline">Back</Link>
           </div>
         </div>
       </div>
