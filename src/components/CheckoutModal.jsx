@@ -1,8 +1,17 @@
 import { useState } from 'react';
 import { X, CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { orderAPI } from '../utils/api';
 
 const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  const { cartItems, clearCart } = useCart();
+  const { user } = useAuth();
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,11 +37,49 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setStep(2);
-    if (onOrderComplete) {
-      onOrderComplete();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const orderData = {
+        items: cartItems.map(item => ({
+          productId: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalAmount: parseFloat(cartTotal.total),
+        shippingAddress: {
+          fullName: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.zipCode,
+          country: formData.country
+        },
+        paymentMethod: formData.paymentMethod
+      };
+
+      const response = await orderAPI.create(orderData);
+
+      if (response.data.success) {
+        setOrderId(response.data.order._id);
+        clearCart();
+        setStep(2);
+        if (onOrderComplete) {
+          onOrderComplete();
+        }
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to create order. Please try again.';
+      setError(errorMsg);
+      console.error('Order creation error:', err);
+      console.error('Error response:', err.response?.data);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,6 +87,8 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
     setTimeout(() => {
       onClose();
       setStep(1);
+      setError(null);
+      setOrderId(null);
       setFormData({
         firstName: '',
         lastName: '',
@@ -60,6 +109,35 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
   };
 
   if (!isOpen) return null;
+
+  if (!user) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center px-6 pt-32 pb-6">
+        <div 
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please Sign In</h2>
+          <p className="text-gray-600 mb-6">You need to be signed in to place an order.</p>
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <a
+              href="/login"
+              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors text-center"
+            >
+              Sign In
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-6 pt-32 pb-6">
@@ -83,6 +161,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,8 +325,8 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="cash"
-                      checked={formData.paymentMethod === 'cash'}
+                      value="cash-on-delivery"
+                      checked={formData.paymentMethod === 'cash-on-delivery'}
                       onChange={handleInputChange}
                       className="w-4 h-4 text-orange-500"
                     />
@@ -339,9 +422,10 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Complete Order
+                {loading ? 'Processing...' : 'Complete Order'}
               </button>
             </form>
           </>
@@ -357,6 +441,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
             <p className="text-gray-600 text-lg mb-2">Thank you for your purchase, {formData.firstName}!</p>
             <p className="text-gray-500 mb-6">Your order has been successfully placed.</p>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 w-full max-w-md">
+              {orderId && (
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-semibold">Order ID:</span> {orderId}
+                </p>
+              )}
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">Order Total:</span> ${cartTotal?.total || '0.00'}
               </p>

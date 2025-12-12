@@ -16,6 +16,8 @@ import CollectionDetail from './pages/CollectionDetail'
 
 import Shop from './pages/Shop'
 import Cart from './pages/Cart'
+import Orders from './pages/Orders'
+import OrderDetail from './pages/OrderDetail'
 
 function App() {
   return (
@@ -37,6 +39,10 @@ function App() {
             {/* Collections */}
             <Route path="/collections" element={<Collections />} />
             <Route path="/collection/:id" element={<CollectionDetail />} />
+
+            {/* Orders */}
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
           </Routes>
         </Router>
       </CartProvider>

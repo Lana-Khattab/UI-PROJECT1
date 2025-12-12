@@ -200,6 +200,7 @@ function Navbar() {
               >
                 Cart
               </button>
+              <Link to="/orders" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Orders</Link>
               <Link to="/profile" className="hover:text-orange-500 py-2" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
             </div>
           </div>
@@ -223,6 +224,7 @@ function Navbar() {
               )}
             </button>
             <button onClick={() => setIsCartOpen(true)} className="hover:text-orange-500">Cart</button>
+            <Link to="/orders" className="hover:text-orange-500">Orders</Link>
             <Link to="/profile" className="hover:text-orange-500">Profile</Link>
           </div>
         </div>

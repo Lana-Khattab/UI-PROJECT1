@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Minus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import CheckoutModal from '../components/CheckoutModal';
@@ -8,6 +8,13 @@ import { useCart } from '../context/CartContext';
 function Cart() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { cartItems, updateQuantity, removeItem } = useCart();
+  const navigate = useNavigate();
+
+  const handleOrderComplete = () => {
+    setTimeout(() => {
+      navigate('/orders');
+    }, 2000);
+  };
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -196,6 +203,7 @@ function Cart() {
         isOpen={isCheckoutOpen} 
         onClose={() => setIsCheckoutOpen(false)}
         cartTotal={getCartTotal()}
+        onOrderComplete={handleOrderComplete}
       />
     </div>
   );

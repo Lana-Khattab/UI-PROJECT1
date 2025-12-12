@@ -12,7 +12,7 @@ exports.createOrder = async (req, res) => {
     }
 
     const order = await Order.create({
-      userId: req.user.id,
+      userId: req.user._id,
       items,
       totalAmount,
       shippingAddress,
@@ -25,6 +25,7 @@ exports.createOrder = async (req, res) => {
       order
     });
   } catch (error) {
+    console.error('Order creation error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -35,7 +36,7 @@ exports.createOrder = async (req, res) => {
 
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -62,7 +63,7 @@ exports.getOrderById = async (req, res) => {
       });
     }
 
-    if (order.userId.toString() !== req.user.id) {
+    if (order.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view this order'
@@ -95,7 +96,7 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    if (order.userId.toString() !== req.user.id) {
+    if (order.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this order'
