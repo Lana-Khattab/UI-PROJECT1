@@ -3,6 +3,7 @@ import HeroSection from '../components/HeroSection'
 import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import recipes from '../data/recipes.json'
 
 function Home() {
@@ -29,8 +30,29 @@ function Home() {
     { name: 'Japanese', count: 92 }
   ]
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5
+      }
+    }
+  }
+
   return (
-    <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">
+    <div className="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans min-h-screen transition-colors">
       <Navbar />
       <HeroSection />
       
@@ -39,95 +61,132 @@ function Home() {
           <Sidebar />
           
           <main className="lg:col-span-9 space-y-6">
-            <section>
-              <h2 className="mb-4">Community Feed</h2>
-              <div className="bg-white rounded-xl border p-6">
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="mb-4 text-gray-900 dark:text-dark-text">Community Feed</h2>
+              <div className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border p-6 transition-colors">
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold">
+                  <motion.div 
+                    className="flex items-start gap-3"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center font-semibold">
                       O
                     </div>
                     <div>
                       <p>
-                        <span className="font-semibold">Owen</span>
-                        <span className="text-gray-600"> shared a new recipe</span>
+                        <span className="font-semibold dark:text-dark-text">Owen</span>
+                        <span className="text-gray-600 dark:text-dark-muted"> shared a new recipe</span>
                       </p>
-                      <p className="text-sm text-gray-500">2 hours ago</p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                      <p className="text-sm text-gray-500 dark:text-dark-muted">2 hours ago</p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold">
+                  </motion.div>
+                  <motion.div 
+                    className="flex items-start gap-3"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center font-semibold">
                       C
                     </div>
                     <div>
                       <p>
-                        <span className="font-semibold">Chloe</span>
-                        <span className="text-gray-600"> shared a new recipe</span>
+                        <span className="font-semibold dark:text-dark-text">Chloe</span>
+                        <span className="text-gray-600 dark:text-dark-muted"> shared a new recipe</span>
                       </p>
-                      <p className="text-sm text-gray-500">3 days ago</p>
+                      <p className="text-sm text-gray-500 dark:text-dark-muted">3 days ago</p>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
-            </section>
+            </motion.section>
 
-            <section>
-              <h2 className="mb-4">Top Recipes</h2>
+            <motion.section
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <h2 className="mb-4 text-gray-900 dark:text-dark-text">Top Recipes</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {topRecipes.map((recipe) => (
-                  <div key={recipe.id} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
+                {topRecipes.map((recipe, index) => (
+                  <motion.div 
+                    key={recipe.id} 
+                    className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border overflow-hidden hover:shadow-lg dark:hover:shadow-orange-500/10 transition-all"
+                    variants={itemVariants}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  >
                     <Link to={`/recipe/${recipe.id}`}>
                       <div 
                         className="h-32 bg-cover bg-center"
                         style={{backgroundImage: `url('${recipe.image}')`}}
+                        role="img"
+                        aria-label={recipe.title}
                       />
                       <div className="p-3">
-                        <h4 className="font-semibold mb-1">{recipe.title}</h4>
-                        <p className="text-sm text-gray-600">by {recipe.chef}</p>
+                        <h4 className="font-semibold mb-1 dark:text-dark-text">{recipe.title}</h4>
+                        <p className="text-sm text-gray-600 dark:text-dark-muted">by {recipe.chef}</p>
                       </div>
                     </Link>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </section>
+            </motion.section>
 
-            <section>
-              <h2 className="mb-4">Recommended for You</h2>
+            <motion.section
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <h2 className="mb-4 text-gray-900 dark:text-dark-text">Recommended for You</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {recommendedRecipes.map((recipe) => (
-                  <div key={recipe.id} className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow">
+                  <motion.div 
+                    key={recipe.id} 
+                    className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border overflow-hidden hover:shadow-lg dark:hover:shadow-orange-500/10 transition-all"
+                    variants={itemVariants}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  >
                     <Link to={`/recipe/${recipe.id}`}>
                       <div 
                         className="h-48 bg-cover bg-center"
                         style={{backgroundImage: `url('${recipe.image}')`}}
+                        role="img"
+                        aria-label={recipe.title}
                       />
                     </Link>
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                          <h3 className="font-semibold mb-1 hover:text-orange-500 transition-colors">
+                          <h3 className="font-semibold mb-1 hover:text-orange-500 transition-colors dark:text-dark-text">
                             {recipe.title}
                           </h3>
                         </Link>
-                        <button 
+                        <motion.button 
                           onClick={() => toggleFavorite(recipe.id)}
-                          className={`h-8 w-8 p-0 ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                          className={`h-8 w-8 p-0 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-400 dark:text-dark-muted hover:text-red-500'}`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          aria-label={favorites.includes(recipe.id) ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          <svg className={`h-4 w-4 ${favorites.includes(recipe.id) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`h-4 w-4 ${favorites.includes(recipe.id) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
-                        </button>
+                        </motion.button>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">by {recipe.chef}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <p className="text-sm text-gray-600 dark:text-dark-muted mb-3">by {recipe.chef}</p>
+                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-dark-muted">
                         <div className="flex items-center gap-1">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span>{recipe.time} min</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                           </svg>
                           <span>{recipe.servings}</span>
@@ -139,65 +198,74 @@ function Home() {
                       </div>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {recipe.tags.map((tag, index) => (
-                          <span key={index} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">{tag}</span>
+                          <span key={index} className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-dark-muted rounded-full">{tag}</span>
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </section>
+            </motion.section>
 
-            <section>
-              <h2 className="mb-4">Explore by Cuisine</h2>
+            <motion.section
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <h2 className="mb-4 text-gray-900 dark:text-dark-text">Explore by Cuisine</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {cuisines.map((cuisine, index) => (
                   <Link to={`/explore?cuisine=${cuisine.name}`} key={index}>
-                    <div className="bg-white rounded-xl border p-4 hover:bg-orange-50 hover:border-orange-300 transition-colors text-center">
-                      <h4 className="font-semibold mb-1">{cuisine.name}</h4>
-                      <p className="text-sm text-gray-600">{cuisine.count} recipes</p>
-                    </div>
+                    <motion.div 
+                      className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border p-4 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-300 dark:hover:border-orange-700 transition-colors text-center focus-within:ring-2 focus-within:ring-orange-500"
+                      variants={itemVariants}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <h4 className="font-semibold mb-1 dark:text-dark-text">{cuisine.name}</h4>
+                      <p className="text-sm text-gray-600 dark:text-dark-muted">{cuisine.count} recipes</p>
+                    </motion.div>
                   </Link>
                 ))}
               </div>
-            </section>
+            </motion.section>
           </main>
         </div>
       </div>
 
-      <footer className="bg-white border-t mt-12">
+      <footer className="bg-white dark:bg-dark-card border-t dark:border-dark-border mt-12 transition-colors" role="contentinfo">
         <div className="container mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h4 className="font-bold mb-4">FOODIES</h4>
-              <p className="text-sm text-gray-600">
+              <h4 className="font-bold mb-4 dark:text-dark-text">FOODIES</h4>
+              <p className="text-sm text-gray-600 dark:text-dark-muted">
                 Your ultimate destination for discovering and sharing delicious recipes.
               </p>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Explore</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link to="/explore" className="hover:text-orange-500">All Recipes</Link></li>
-                <li><Link to="/collections" className="hover:text-orange-500">Collections</Link></li>
-                <li><Link to="/dashboard" className="hover:text-orange-500">Meal Planner</Link></li>
-                <li><Link to="/add-recipe" className="hover:text-orange-500">Create Recipe</Link></li>
+              <h4 className="font-bold mb-4 dark:text-dark-text">Explore</h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-dark-muted">
+                <li><Link to="/explore" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">All Recipes</Link></li>
+                <li><Link to="/collections" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Collections</Link></li>
+                <li><Link to="/dashboard" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Meal Planner</Link></li>
+                <li><Link to="/add-recipe" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Create Recipe</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Community</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link to="/" className="hover:text-orange-500">Community Feed</Link></li>
-                <li><Link to="/profile" className="hover:text-orange-500">Your Profile</Link></li>
-                <li><Link to="/explore" className="hover:text-orange-500">Top Chefs</Link></li>
+              <h4 className="font-bold mb-4 dark:text-dark-text">Community</h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-dark-muted">
+                <li><Link to="/" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Community Feed</Link></li>
+                <li><Link to="/profile" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Your Profile</Link></li>
+                <li><Link to="/explore" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Top Chefs</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link to="/" className="hover:text-orange-500">Help Center</Link></li>
-                <li><Link to="/" className="hover:text-orange-500">Contact Us</Link></li>
-                <li><Link to="/" className="hover:text-orange-500">Privacy Policy</Link></li>
-                <li><Link to="/" className="hover:text-orange-500">Terms of Service</Link></li>
+              <h4 className="font-bold mb-4 dark:text-dark-text">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-dark-muted">
+                <li><Link to="/" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Help Center</Link></li>
+                <li><Link to="/" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Contact Us</Link></li>
+                <li><Link to="/" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Privacy Policy</Link></li>
+                <li><Link to="/" className="hover:text-orange-500 focus:outline-none focus:text-orange-500">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
