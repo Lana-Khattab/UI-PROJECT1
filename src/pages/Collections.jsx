@@ -2,16 +2,29 @@ import Navbar from '../components/Navbar'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import recipes from '../data/recipes.json'
+import { recipeAPI } from '../utils/api'
 
 function Collections() {
   const [collections, setCollections] = useState([])
+  const [recipes, setRecipes] = useState([])
   const [newCollectionName, setNewCollectionName] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingCollection, setEditingCollection] = useState(null)
   const [editName, setEditName] = useState('')
 
   useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await recipeAPI.getAll()
+        if (response.data.success) {
+          setRecipes(response.data.recipes)
+        }
+      } catch (error) {
+        console.error('Error fetching recipes:', error)
+      }
+    }
+    fetchRecipes()
+
     const savedCollections = localStorage.getItem('recipe-collections')
     if (savedCollections) {
       setCollections(JSON.parse(savedCollections))
@@ -21,7 +34,7 @@ function Collections() {
           id: 1,
           name: 'Quick & Easy',
           description: 'Recipes under 30 minutes',
-          recipeIds: [1, 3, 6, 7],
+          recipeIds: [],
           isFavorite: true,
           color: 'bg-blue-50',
           borderColor: 'border-blue-200',
@@ -31,7 +44,7 @@ function Collections() {
           id: 2,
           name: 'Healthy Options',
           description: 'Nutritious and balanced meals',
-          recipeIds: [2, 4, 11, 13],
+          recipeIds: [],
           isFavorite: false,
           color: 'bg-green-50',
           borderColor: 'border-green-200',
@@ -41,7 +54,7 @@ function Collections() {
           id: 3,
           name: 'Weekend Specials',
           description: 'For when you have more time',
-          recipeIds: [5, 8, 9, 10, 12],
+          recipeIds: [],
           isFavorite: true,
           color: 'bg-purple-50',
           borderColor: 'border-purple-200',
@@ -51,7 +64,7 @@ function Collections() {
           id: 4,
           name: 'Vegetarian Favorites',
           description: 'Meat-free delicious options',
-          recipeIds: [1, 3, 6, 9, 11, 12, 13],
+          recipeIds: [],
           isFavorite: false,
           color: 'bg-emerald-50',
           borderColor: 'border-emerald-200',
@@ -70,7 +83,7 @@ function Collections() {
   }, [collections])
 
   const getRecipeById = (id) => {
-    return recipes.find(recipe => recipe.id === id)
+    return recipes.find(recipe => recipe._id === id || recipe.id === id)
   }
 
   const handleCreateCollection = (e) => {

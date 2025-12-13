@@ -75,4 +75,14 @@ export const orderAPI = {
   cancel: (id) => api.put(`/orders/${id}/cancel`)
 };
 
+export const dashboardAPI = {
+  getStats: () => api.get('/dashboard/stats'),
+  getRecipeTypes: () => api.get('/dashboard/recipe-types'),
+  getFavoritesByCategory: () => api.get('/dashboard/favorites-by-category'),
+  getRecentActivity: () => api.get('/dashboard/recent-activity'),
+  getWeeklyMealPlan: () => api.get('/dashboard/meal-plan'),
+  getAllMealPlans: () => api.get('/dashboard/meal-plans'),
+  saveMealPlan: (mealPlan, weekStartDate) => api.post('/dashboard/meal-plan', { mealPlan, weekStartDate })
+};
+
 export default api;
