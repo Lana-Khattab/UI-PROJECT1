@@ -2,7 +2,7 @@ import Navbar from '../components/Navbar'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import recipes from '../data/recipes.json'
+import axios from 'axios'
 
 function Collections() {
   const [collections, setCollections] = useState([])
@@ -10,140 +10,265 @@ function Collections() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingCollection, setEditingCollection] = useState(null)
   const [editName, setEditName] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const savedCollections = localStorage.getItem('recipe-collections')
-    if (savedCollections) {
-      setCollections(JSON.parse(savedCollections))
-    } else {
-      const defaultCollections = [
-        {
-          id: 1,
-          name: 'Quick & Easy',
-          description: 'Recipes under 30 minutes',
-          recipeIds: [1, 3, 6, 7],
-          isFavorite: true,
-          color: 'bg-blue-50',
-          borderColor: 'border-blue-200',
-          createdAt: '2024-10-15'
-        },
-        {
-          id: 2,
-          name: 'Healthy Options',
-          description: 'Nutritious and balanced meals',
-          recipeIds: [2, 4, 11, 13],
-          isFavorite: false,
-          color: 'bg-green-50',
-          borderColor: 'border-green-200',
-          createdAt: '2024-10-20'
-        },
-        {
-          id: 3,
-          name: 'Weekend Specials',
-          description: 'For when you have more time',
-          recipeIds: [5, 8, 9, 10, 12],
-          isFavorite: true,
-          color: 'bg-purple-50',
-          borderColor: 'border-purple-200',
-          createdAt: '2024-10-25'
-        },
-        {
-          id: 4,
-          name: 'Vegetarian Favorites',
-          description: 'Meat-free delicious options',
-          recipeIds: [1, 3, 6, 9, 11, 12, 13],
-          isFavorite: false,
-          color: 'bg-emerald-50',
-          borderColor: 'border-emerald-200',
-          createdAt: '2024-11-01'
-        }
-      ]
-      setCollections(defaultCollections)
-      localStorage.setItem('recipe-collections', JSON.stringify(defaultCollections))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (collections.length > 0) {
-      localStorage.setItem('recipe-collections', JSON.stringify(collections))
-    }
-  }, [collections])
-
-  const getRecipeById = (id) => {
-    return recipes.find(recipe => recipe.id === id)
+  // Get JWT token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem('token')
   }
 
-  const handleCreateCollection = (e) => {
+  // Fetch collections from backend API
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        setLoading(true)
+        const token = getAuthToken()
+        if (!token) {
+          setError('Please login to view collections')
+          setLoading(false)
+          return
+        }
+
+        const response = await axios.get('http://localhost:5000/api/collections/my-collections', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.data.success) {
+          setCollections(response.data.collections || [])
+        } else {
+          setError('Failed to fetch collections')
+        }
+      } catch (err) {
+        console.error('Error fetching collections:', err)
+        setError(err.response?.data?.message || 'Failed to fetch collections')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCollections()
+  }, [])
+
+  const handleCreateCollection = async (e) => {
     e.preventDefault()
     if (!newCollectionName.trim()) return
 
-    const newCollection = {
-      id: Date.now(),
-      name: newCollectionName,
-      description: '',
-      recipeIds: [],
-      isFavorite: false,
-      color: 'bg-gray-50',
-      borderColor: 'border-gray-200',
-      createdAt: new Date().toISOString().split('T')[0]
-    }
-
-    setCollections([...collections, newCollection])
-    setNewCollectionName('')
-    setShowCreateForm(false)
-  }
-
-  const handleDeleteCollection = (collectionId) => {
-    if (window.confirm('Are you sure you want to delete this collection?')) {
-      setCollections(collections.filter(collection => collection.id !== collectionId))
-    }
-  }
-
-  const toggleCollectionFavorite = (collectionId) => {
-    setCollections(collections.map(collection => 
-      collection.id === collectionId 
-        ? { ...collection, isFavorite: !collection.isFavorite }
-        : collection
-    ))
-  }
-
-  const addRecipeToCollection = (collectionId, recipeId) => {
-    setCollections(collections.map(collection => {
-      if (collection.id === collectionId && !collection.recipeIds.includes(recipeId)) {
-        return { ...collection, recipeIds: [...collection.recipeIds, recipeId] }
-      }
-      return collection
-    }))
-  }
-
-  const removeRecipeFromCollection = (collectionId, recipeId) => {
-    setCollections(collections.map(collection => {
-      if (collection.id === collectionId) {
-        return { 
-          ...collection, 
-          recipeIds: collection.recipeIds.filter(id => id !== recipeId) 
+    try {
+      const token = getAuthToken()
+      const response = await axios.post('http://localhost:5000/api/collections', 
+        {
+          name: newCollectionName,
+          description: ''
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
+      )
+
+      if (response.data.success) {
+        setCollections([...collections, response.data.collection])
+        setNewCollectionName('')
+        setShowCreateForm(false)
       }
-      return collection
-    }))
+    } catch (err) {
+      console.error('Error creating collection:', err)
+      alert(err.response?.data?.message || 'Failed to create collection')
+    }
   }
 
-  const handleUpdateCollectionName = (collectionId) => {
+  const handleDeleteCollection = async (collectionId) => {
+    if (!window.confirm('Are you sure you want to delete this collection?')) {
+      return
+    }
+
+    try {
+      const token = getAuthToken()
+      const response = await axios.delete(`http://localhost:5000/api/collections/${collectionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.success) {
+        setCollections(collections.filter(collection => collection._id !== collectionId))
+      }
+    } catch (err) {
+      console.error('Error deleting collection:', err)
+      alert(err.response?.data?.message || 'Failed to delete collection')
+    }
+  }
+
+  const toggleCollectionFavorite = async (collectionId) => {
+    try {
+      const collection = collections.find(c => c._id === collectionId)
+      if (!collection) return
+
+      const token = getAuthToken()
+      const response = await axios.put(`http://localhost:5000/api/collections/${collectionId}`,
+        {
+          isFavorite: !collection.isFavorite
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (response.data.success) {
+        setCollections(collections.map(c => 
+          c._id === collectionId ? { ...c, isFavorite: !c.isFavorite } : c
+        ))
+      }
+    } catch (err) {
+      console.error('Error updating collection:', err)
+      alert(err.response?.data?.message || 'Failed to update collection')
+    }
+  }
+
+  const addRecipeToCollection = async (collectionId, recipeId) => {
+    try {
+      const token = getAuthToken()
+      const response = await axios.post(`http://localhost:5000/api/collections/${collectionId}/add-recipe`,
+        { recipeId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (response.data.success) {
+        // Update the collection in state
+        setCollections(collections.map(collection => {
+          if (collection._id === collectionId) {
+            return response.data.collection
+          }
+          return collection
+        }))
+      }
+    } catch (err) {
+      console.error('Error adding recipe to collection:', err)
+      alert(err.response?.data?.message || 'Failed to add recipe to collection')
+    }
+  }
+
+  const removeRecipeFromCollection = async (collectionId, recipeId) => {
+    try {
+      const token = getAuthToken()
+      const response = await axios.post(`http://localhost:5000/api/collections/${collectionId}/remove-recipe`,
+        { recipeId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (response.data.success) {
+        // Update the collection in state
+        setCollections(collections.map(collection => {
+          if (collection._id === collectionId) {
+            return response.data.collection
+          }
+          return collection
+        }))
+      }
+    } catch (err) {
+      console.error('Error removing recipe from collection:', err)
+      alert(err.response?.data?.message || 'Failed to remove recipe from collection')
+    }
+  }
+
+  const handleUpdateCollectionName = async (collectionId) => {
     if (!editName.trim()) return
-    setCollections(collections.map(collection => 
-      collection.id === collectionId 
-        ? { ...collection, name: editName }
-        : collection
-    ))
-    setEditingCollection(null)
-    setEditName('')
+
+    try {
+      const token = getAuthToken()
+      const response = await axios.put(`http://localhost:5000/api/collections/${collectionId}`,
+        { name: editName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (response.data.success) {
+        setCollections(collections.map(collection => 
+          collection._id === collectionId 
+            ? { ...collection, name: editName }
+            : collection
+        ))
+        setEditingCollection(null)
+        setEditName('')
+      }
+    } catch (err) {
+      console.error('Error updating collection name:', err)
+      alert(err.response?.data?.message || 'Failed to update collection name')
+    }
   }
 
+  // Calculate statistics
   const favoriteCollectionsCount = collections.filter(c => c.isFavorite).length
-
   const totalRecipesInCollections = collections.reduce((total, collection) => 
-    total + collection.recipeIds.length, 0
+    total + (collection.recipes?.length || 0), 0
   )
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="bg-gray-50 dark:bg-dark-bg min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600 dark:text-dark-muted">Loading collections...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-gray-50 dark:bg-dark-bg min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-6 py-8">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">Error</h3>
+                <p className="text-red-600 dark:text-red-400 mt-1">{error}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-4 py-2 rounded hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans min-h-screen transition-colors">
@@ -378,8 +503,8 @@ function Collections() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {collections.map((collection, index) => (
             <motion.div 
-              key={collection.id} 
-              className={`${collection.color} ${collection.borderColor} border rounded-xl overflow-hidden hover:shadow-lg dark:hover:shadow-orange-500/10 transition-all dark:bg-dark-card dark:border-dark-border`}
+              key={collection._id} 
+              className="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden hover:shadow-lg transition-all"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -411,16 +536,16 @@ function Collections() {
                     )}
                    
                     <p className="text-gray-700 dark:text-dark-text transition-colors">
-                      <span className="font-semibold">{collection.recipeIds.length}</span> recipes
+                      <span className="font-semibold">{collection.recipes?.length || 0}</span> recipes
                     </p>
                     <p className="text-gray-500 dark:text-dark-muted text-sm mt-1 transition-colors">
-                      Created: {collection.createdAt}
+                      Created: {new Date(collection.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                  
                   <div className="flex flex-col gap-2">
                     <motion.button
-                      onClick={() => toggleCollectionFavorite(collection.id)}
+                      onClick={() => toggleCollectionFavorite(collection._id)}
                       className={`p-2 rounded-full transition-colors ${collection.isFavorite ? 'text-red-500 hover:text-red-600' : 'text-gray-400 dark:text-dark-muted hover:text-gray-600 dark:hover:text-dark-text'}`}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -431,7 +556,7 @@ function Collections() {
                     </motion.button>
                    
                     <motion.button
-                      onClick={() => handleDeleteCollection(collection.id)}
+                      onClick={() => handleDeleteCollection(collection._id)}
                       className="p-2 text-gray-400 dark:text-dark-muted hover:text-red-500 dark:hover:text-red-400 rounded-full transition-colors"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -446,53 +571,49 @@ function Collections() {
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-3 transition-colors">Recipes in this collection:</h4>
                   <div className="space-y-2">
-                    {collection.recipeIds.slice(0, 3).map(recipeId => {
-                      const recipe = getRecipeById(recipeId)
-                      if (!recipe) return null
-                      return (
-                        <motion.div 
-                          key={recipeId} 
-                          className="flex items-center justify-between bg-white/50 dark:bg-dark-border/50 rounded-lg p-2 transition-colors"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          whileHover={{ x: 5 }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded overflow-hidden">
-                              <img 
-                                src={recipe.image} 
-                                alt={recipe.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-dark-text truncate max-w-[150px] transition-colors">
-                                {recipe.title}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-dark-muted transition-colors">{recipe.time} min</p>
-                            </div>
+                    {collection.recipes?.slice(0, 3).map(recipe => (
+                      <motion.div 
+                        key={recipe._id} 
+                        className="flex items-center justify-between bg-gray-50 dark:bg-dark-border rounded-lg p-2 transition-colors"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        whileHover={{ x: 5 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded overflow-hidden">
+                            <img 
+                              src={recipe.image} 
+                              alt={recipe.title}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <motion.button
-                            onClick={() => removeRecipeFromCollection(collection.id, recipeId)}
-                            className="text-gray-400 dark:text-dark-muted hover:text-red-500 dark:hover:text-red-400 p-1 transition-colors"
-                            whileHover={{ scale: 1.2, rotate: 90 }}
-                            whileTap={{ scale: 0.8 }}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </motion.button>
-                        </motion.div>
-                      )
-                    })}
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-dark-text truncate max-w-[150px] transition-colors">
+                              {recipe.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-dark-muted transition-colors">{recipe.time} min</p>
+                          </div>
+                        </div>
+                        <motion.button
+                          onClick={() => removeRecipeFromCollection(collection._id, recipe._id)}
+                          className="text-gray-400 dark:text-dark-muted hover:text-red-500 dark:hover:text-red-400 p-1 transition-colors"
+                          whileHover={{ scale: 1.2, rotate: 90 }}
+                          whileTap={{ scale: 0.8 }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </motion.button>
+                      </motion.div>
+                    ))}
                    
-                    {collection.recipeIds.length > 3 && (
+                    {collection.recipes?.length > 3 && (
                       <p className="text-sm text-gray-500 dark:text-dark-muted text-center transition-colors">
-                        + {collection.recipeIds.length - 3} more recipes
+                        + {collection.recipes.length - 3} more recipes
                       </p>
                     )}
                    
-                    {collection.recipeIds.length === 0 && (
+                    {(!collection.recipes || collection.recipes.length === 0) && (
                       <p className="text-sm text-gray-400 dark:text-dark-muted text-center py-2 transition-colors">
                         No recipes yet. Add some!
                       </p>
@@ -502,14 +623,14 @@ function Collections() {
 
                 <div className="flex gap-3">
                   <Link 
-                    to={`/collection/${collection.id}`}
+                    to={`/collection/${collection._id}`}
                     className="flex-1 bg-gray-900 dark:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 dark:hover:bg-orange-600 text-center transition-colors"
                   >
                     View Collection
                   </Link>
                   <motion.button
                     onClick={() => {
-                      setEditingCollection(collection.id)
+                      setEditingCollection(collection._id)
                       setEditName(collection.name)
                     }}
                     className="px-4 py-2 border dark:border-dark-border border-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-dark-border dark:text-dark-text transition-colors"

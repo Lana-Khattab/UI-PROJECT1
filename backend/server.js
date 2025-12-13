@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
+// Add this near your other route imports
+const collectionRoutes = require('./routes/collectionRoutes');
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       recipes: '/api/recipes',
       users: '/api/users',
-      orders: '/api/orders'
+      orders: '/api/orders',
+      collections: '/api/collections'
     }
   });
 });
@@ -35,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/collections', collectionRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -50,3 +53,10 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+
+
+
+
+// Add this near your other app.use() calls
+app.use('/api/collections', collectionRoutes);
