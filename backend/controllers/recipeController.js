@@ -1,5 +1,6 @@
-    const Recipe = require('../models/Recipe');
+const Recipe = require('../models/Recipe');
 const User = require('../models/User');
+const { createNotification } = require('./notificationController');
 
 exports.getAllRecipes = async (req, res) => {
   try {
@@ -202,7 +203,7 @@ exports.deleteRecipe = async (req, res) => {
 exports.addReview = async (req, res) => {
   try {
     const { text } = req.body;
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(req.params.id).populate('userId');
 
     if (!recipe) {
       return res.status(404).json({
@@ -222,6 +223,21 @@ exports.addReview = async (req, res) => {
     recipe.reviewsCount = recipe.reviews.length;
 
     await recipe.save();
+
+    // Create notification for the recipe owner
+    if (recipe.userId._id.toString() !== req.user.id) {
+      await createNotification(
+        recipe.userId._id,
+        'comment',
+        `${req.user.name} commented on your recipe`,
+        {
+          sender: req.user.id,
+          relatedRecipe: recipe._id,
+          action: 'commented on',
+          comment: text
+        }
+      );
+    }
 
     res.status(201).json({
       success: true,

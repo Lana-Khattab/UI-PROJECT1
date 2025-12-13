@@ -1,11 +1,12 @@
 const User = require('../models/User');
 const Recipe = require('../models/Recipe');
+const { createNotification } = require('./notificationController');
 
 exports.addToFavorites = async (req, res) => {
   try {
     const { recipeId } = req.body;
 
-    const recipe = await Recipe.findById(recipeId);
+    const recipe = await Recipe.findById(recipeId).populate('userId');
     if (!recipe) {
       return res.status(404).json({
         success: false,
@@ -24,6 +25,20 @@ exports.addToFavorites = async (req, res) => {
 
     user.favorites.push(recipeId);
     await user.save();
+
+    // Create notification for the recipe owner
+    if (recipe.userId._id.toString() !== req.user.id) {
+      await createNotification(
+        recipe.userId._id,
+        'like',
+        `${req.user.name} liked your recipe`,
+        {
+          sender: req.user.id,
+          relatedRecipe: recipe._id,
+          action: 'liked'
+        }
+      );
+    }
 
     res.status(200).json({
       success: true,
