@@ -35,7 +35,10 @@ exports.getAllRecipes = async (req, res) => {
       sortOption = { createdAt: -1 };
     }
 
-    const recipes = await Recipe.find(query).sort(sortOption);
+    const recipes = await Recipe.find(query)
+      .select('title chef image time servings rating reviewsCount tags season mood difficulty cuisine')
+      .sort(sortOption)
+      .lean();
 
     res.status(200).json({
       success: true,

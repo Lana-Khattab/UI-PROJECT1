@@ -2,12 +2,31 @@ import Navbar from '../components/Navbar'
 import HeroSection from '../components/HeroSection'
 import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import recipes from '../data/recipes.json'
+import { recipeAPI } from '../utils/api'
 
 function Home() {
-  const [favorites, setFavorites] = useState([2, 4])
+  const [favorites, setFavorites] = useState([])
+  const [recipes, setRecipes] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadRecipes()
+  }, [])
+
+  const loadRecipes = async () => {
+    try {
+      const response = await recipeAPI.getAll()
+      if (response.data.success) {
+        setRecipes(response.data.recipes)
+      }
+    } catch (error) {
+      console.error('Error loading recipes:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleFavorite = (id) => {
     setFavorites(prev => 
@@ -112,14 +131,16 @@ function Home() {
             >
               <h2 className="mb-4 text-gray-900 dark:text-dark-text">Top Recipes</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {topRecipes.map((recipe, index) => (
+                {topRecipes.map((recipe, index) => {
+                  const recipeId = recipe._id || recipe.id
+                  return (
                   <motion.div 
-                    key={recipe.id} 
+                    key={recipeId} 
                     className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border overflow-hidden hover:shadow-lg dark:hover:shadow-orange-500/10 transition-all"
                     variants={itemVariants}
                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                   >
-                    <Link to={`/recipe/${recipe.id}`}>
+                    <Link to={`/recipe/${recipeId}`}>
                       <div 
                         className="h-32 bg-cover bg-center"
                         style={{backgroundImage: `url('${recipe.image}')`}}
@@ -132,7 +153,8 @@ function Home() {
                       </div>
                     </Link>
                   </motion.div>
-                ))}
+                )})
+                }
               </div>
             </motion.section>
 
@@ -143,14 +165,16 @@ function Home() {
             >
               <h2 className="mb-4 text-gray-900 dark:text-dark-text">Recommended for You</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {recommendedRecipes.map((recipe) => (
+                {recommendedRecipes.map((recipe) => {
+                  const recipeId = recipe._id || recipe.id
+                  return (
                   <motion.div 
-                    key={recipe.id} 
+                    key={recipeId} 
                     className="bg-white dark:bg-dark-card rounded-xl border dark:border-dark-border overflow-hidden hover:shadow-lg dark:hover:shadow-orange-500/10 transition-all"
                     variants={itemVariants}
                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                   >
-                    <Link to={`/recipe/${recipe.id}`}>
+                    <Link to={`/recipe/${recipeId}`}>
                       <div 
                         className="h-48 bg-cover bg-center"
                         style={{backgroundImage: `url('${recipe.image}')`}}
@@ -160,19 +184,19 @@ function Home() {
                     </Link>
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <Link to={`/recipe/${recipe.id}`} className="flex-1">
+                        <Link to={`/recipe/${recipeId}`} className="flex-1">
                           <h3 className="font-semibold mb-1 hover:text-orange-500 transition-colors dark:text-dark-text">
                             {recipe.title}
                           </h3>
                         </Link>
                         <motion.button 
-                          onClick={() => toggleFavorite(recipe.id)}
-                          className={`h-8 w-8 p-0 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-400 dark:text-dark-muted hover:text-red-500'}`}
+                          onClick={() => toggleFavorite(recipeId)}
+                          className={`h-8 w-8 p-0 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded ${favorites.includes(recipeId) ? 'text-red-500' : 'text-gray-400 dark:text-dark-muted hover:text-red-500'}`}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          aria-label={favorites.includes(recipe.id) ? 'Remove from favorites' : 'Add to favorites'}
+                          aria-label={favorites.includes(recipeId) ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          <svg className={`h-4 w-4 ${favorites.includes(recipe.id) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <svg className={`h-4 w-4 ${favorites.includes(recipeId) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
                         </motion.button>
@@ -203,7 +227,8 @@ function Home() {
                       </div>
                     </div>
                   </motion.div>
-                ))}
+                );
+                })}
               </div>
             </motion.section>
 
