@@ -2,12 +2,12 @@ import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
-import { recipeAPI } from '../utils/api'
+import { recipeAPI, userAPI } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 
 function RecipeDetails() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [recipe, setRecipe] = useState(null)
   const [loading, setLoading] = useState(true)
   const [collections, setCollections] = useState([])
@@ -16,6 +16,8 @@ function RecipeDetails() {
   const [comment, setComment] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState('')
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [favorites, setFavorites] = useState([])
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -41,7 +43,49 @@ function RecipeDetails() {
     if (savedCollections) {
       setCollections(JSON.parse(savedCollections))
     }
-  }, [])
+
+    if (isAuthenticated) {
+      loadFavorites()
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    if (id && favorites.length > 0) {
+      setIsFavorited(favorites.includes(id))
+    }
+  }, [id, favorites])
+
+  const loadFavorites = async () => {
+    try {
+      const response = await userAPI.getFavorites()
+      if (response.data.success) {
+        setFavorites(response.data.favorites.map(fav => fav._id))
+      }
+    } catch (error) {
+      console.error('Error loading favorites:', error)
+    }
+  }
+
+  const toggleFavorite = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to add favorites')
+      return
+    }
+
+    try {
+      if (isFavorited) {
+        await userAPI.removeFromFavorites(id)
+        setFavorites(prev => prev.filter(fav => fav !== id))
+        setIsFavorited(false)
+      } else {
+        await userAPI.addToFavorites(id)
+        setFavorites(prev => [...prev, id])
+        setIsFavorited(true)
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
+  }
 
   const addToCollection = (collectionId) => {
     const updatedCollections = collections.map(collection => {
@@ -159,9 +203,8 @@ function RecipeDetails() {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text">
               {recipe.title}
             </h1>
-
-            <div className="flex items-center gap-4 text-gray-700 dark:text-dark-muted">
-              <p className="text-base">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <p className="text-sm text-gray-600 dark:text-dark-muted">
                 by <span className="font-semibold text-gray-900 dark:text-dark-text">{recipe.chef}</span>
               </p>
               
@@ -199,12 +242,13 @@ function RecipeDetails() {
 
           <nav className="flex gap-3 w-full md:w-auto" aria-label="Recipe actions">
             <motion.button 
-              className="bg-gray-900 dark:bg-orange-600 text-white px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-800 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+              onClick={toggleFavorite}
+              className={`${isFavorited ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-900 dark:bg-orange-600 hover:bg-gray-800 dark:hover:bg-orange-700'} text-white px-6 py-2 rounded-md w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              aria-label="Add to favorites"
+              aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
             >
-              Favorited
+              {isFavorited ? '❤️ Favorited' : 'Favorite'}
             </motion.button>
             <motion.button 
               className="border border-gray-900 dark:border-dark-border text-gray-900 dark:text-dark-text px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-50 dark:hover:bg-dark-border focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
