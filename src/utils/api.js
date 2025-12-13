@@ -85,4 +85,11 @@ export const dashboardAPI = {
   saveMealPlan: (mealPlan, weekStartDate) => api.post('/dashboard/meal-plan', { mealPlan, weekStartDate })
 };
 
+export const notificationAPI = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.put('/notifications/mark-all-as-read'),
+  delete: (notificationId) => api.delete(`/notifications/${notificationId}`)
+};
+
 export default api;
