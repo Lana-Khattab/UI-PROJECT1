@@ -3,14 +3,19 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import { recipeAPI } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 function RecipeDetails() {
   const { id } = useParams()
+  const { user } = useAuth()
   const [recipe, setRecipe] = useState(null)
   const [loading, setLoading] = useState(true)
   const [collections, setCollections] = useState([])
   const [showCollectionDropdown, setShowCollectionDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState('ingredients')
+  const [comment, setComment] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [reviewError, setReviewError] = useState('')
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -22,6 +27,7 @@ function RecipeDetails() {
         }
       } catch (error) {
         console.error('Error fetching recipe:', error)
+        setRecipe(null)
       } finally {
         setLoading(false)
       }
@@ -52,6 +58,37 @@ function RecipeDetails() {
   const isInCollection = (collectionId) => {
     const collection = collections.find(c => c.id === collectionId)
     return collection ? collection.recipeIds.includes(parseInt(id)) : false
+  }
+
+  const handleSubmitReview = async () => {
+    if (!user) {
+      setReviewError('Please login to submit a review')
+      return
+    }
+
+    if (!comment.trim()) {
+      setReviewError('Please enter a comment')
+      return
+    }
+
+    setSubmittingReview(true)
+    setReviewError('')
+
+    try {
+      const response = await recipeAPI.addReview(id, { text: comment })
+      
+      if (response.data.success) {
+        setRecipe(response.data.recipe)
+        setComment('')
+        setReviewError('')
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error)
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to submit review. This recipe may not exist in the database.'
+      setReviewError(errorMsg)
+    } finally {
+      setSubmittingReview(false)
+    }
   }
 
   if (loading) {
@@ -429,6 +466,12 @@ function RecipeDetails() {
           transition={{ delay: 0.7 }}
         >
           <h3 className="font-semibold mb-3 dark:text-dark-text">Add a Comment</h3>
+          {!user && (
+            <p className="text-sm text-orange-500 mb-2">Please <Link to="/login" className="underline">login</Link> to submit a review</p>
+          )}
+          {reviewError && (
+            <p className="text-sm text-red-500 mb-2">{reviewError}</p>
+          )}
           <label htmlFor="comment-textarea" className="sr-only">Your comment</label>
           <textarea 
             id="comment-textarea"
@@ -436,14 +479,19 @@ function RecipeDetails() {
             className="w-full bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border rounded-md p-3 text-sm text-gray-700 dark:text-dark-text focus:ring-2 focus:ring-orange-500 focus:outline-none transition-colors" 
             rows="3"
             aria-label="Comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            disabled={!user || submittingReview}
           ></textarea>
           <div className="flex justify-end mt-3">
             <motion.button 
-              className="bg-gray-900 dark:bg-orange-600 text-white px-6 py-2 rounded-md text-sm hover:bg-gray-800 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="bg-gray-900 dark:bg-orange-600 text-white px-6 py-2 rounded-md text-sm hover:bg-gray-800 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={{ scale: !user || submittingReview ? 1 : 1.02 }}
+              whileTap={{ scale: !user || submittingReview ? 1 : 0.98 }}
+              onClick={handleSubmitReview}
+              disabled={!user || submittingReview}
             >
-              Submit
+              {submittingReview ? 'Submitting...' : 'Submit'}
             </motion.button>
           </div>
         </motion.div>
