@@ -8,37 +8,23 @@ import { recipeAPI } from '../utils/api'
 
 function Home() {
   const [favorites, setFavorites] = useState([])
-  const [favorites, setFavorites] = useState([2, 4])
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadRecipes()
-  }, [])
-
-  const loadRecipes = async () => {
-    try {
-      const response = await recipeAPI.getAll()
-      if (response.data.success) {
-        setRecipes(response.data.recipes)
-      }
-    } catch (error) {
-      console.error('Error loading recipes:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-    const fetchRecipes = async () => {
+    const loadRecipes = async () => {
       try {
         const response = await recipeAPI.getAll()
-        setRecipes(response.data.recipes)
+        if (response.data.success) {
+          setRecipes(response.data.recipes)
+        }
       } catch (error) {
-        console.error('Error fetching recipes:', error)
+        console.error('Error loading recipes:', error)
       } finally {
         setLoading(false)
       }
     }
-    fetchRecipes()
+    loadRecipes()
   }, [])
 
   const toggleFavorite = (id) => {
