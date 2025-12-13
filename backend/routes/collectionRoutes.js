@@ -3,8 +3,11 @@ const router = express.Router();
 const collectionController = require('../controllers/collectionController');
 const auth = require('../middlewares/auth');
 
-// All routes require authentication
-router.use(auth);
+// Public collections (no auth required)
+router.get('/public/all', collectionController.getPublicCollections);
+
+// All routes below require authentication
+router.use(auth.protect);
 
 // User's collections
 router.get('/my-collections', collectionController.getMyCollections);
@@ -17,8 +20,4 @@ router.delete('/:id', collectionController.deleteCollection);
 router.post('/:id/add-recipe', collectionController.addRecipeToCollection);
 router.post('/:id/remove-recipe', collectionController.removeRecipeFromCollection);
 
-// Public collections (no auth required)
-router.get('/public/all', collectionController.getPublicCollections);
-
 module.exports = router;
-
