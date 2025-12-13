@@ -1,14 +1,28 @@
 import Navbar from '../components/Navbar'
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import recipes from '../data/recipes.json'
+import { recipeAPI } from '../utils/api'
 
 function CollectionDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [collection, setCollection] = useState(null)
   const [collections, setCollections] = useState([])
+  const [recipes, setRecipes] = useState([])
+
   useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await recipeAPI.getAll()
+        if (response.data.success) {
+          setRecipes(response.data.recipes)
+        }
+      } catch (error) {
+        console.error('Error fetching recipes:', error)
+      }
+    }
+    fetchRecipes()
+
     const savedCollections = localStorage.getItem('recipe-collections')
     if (savedCollections) {
       const parsed = JSON.parse(savedCollections)
@@ -67,7 +81,7 @@ function CollectionDetail() {
     )
   }
 
-  const getRecipeById = (id) => recipes.find(r => r.id === id)
+  const getRecipeById = (id) => recipes.find(r => r._id === id || r.id === id)
 
   return (
     <div className="bg-gray-50 text-gray-800 font-sans min-h-screen">

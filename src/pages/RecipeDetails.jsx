@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import { recipeAPI } from '../utils/api'
-import recipesJson from '../data/recipes.json'
 
 function RecipeDetails() {
   const { id } = useParams()
@@ -17,26 +16,10 @@ function RecipeDetails() {
     const fetchRecipe = async () => {
       try {
         setLoading(true)
-        
-        let foundRecipe = null
-        
-        try {
-          const response = await recipeAPI.getById(id)
-          if (response.data.success) {
-            foundRecipe = response.data.recipe
-          }
-        } catch (apiError) {
-          console.log('Recipe not found in backend API')
+        const response = await recipeAPI.getById(id)
+        if (response.data.success) {
+          setRecipe(response.data.recipe)
         }
-        
-        if (!foundRecipe) {
-          const localRecipe = recipesJson.find(r => String(r.id) === String(id))
-          if (localRecipe) {
-            foundRecipe = localRecipe
-          }
-        }
-        
-        setRecipe(foundRecipe)
       } catch (error) {
         console.error('Error fetching recipe:', error)
       } finally {

@@ -4,7 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { recipeAPI, userAPI } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
-import recipesJson from '../data/recipes.json'
 
 function Explore() {
   const [searchParams] = useSearchParams()
@@ -40,25 +39,10 @@ function Explore() {
 
   const loadRecipes = async () => {
     try {
-      let allRecipes = []
-      
-      try {
-        const response = await recipeAPI.getAll()
-        if (response.data.success) {
-          allRecipes = response.data.recipes
-        }
-      } catch (error) {
-        console.log('Could not fetch recipes from backend:', error)
+      const response = await recipeAPI.getAll()
+      if (response.data.success) {
+        setRecipes(response.data.recipes)
       }
-      
-      const localRecipes = recipesJson.map(recipe => ({
-        ...recipe,
-        _id: recipe.id
-      }))
-      
-      allRecipes = [...allRecipes, ...localRecipes]
-      
-      setRecipes(allRecipes)
     } catch (error) {
       console.error('Error loading recipes:', error)
     } finally {

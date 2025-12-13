@@ -1,11 +1,193 @@
 import Navbar from '../components/Navbar'
+import PlanWeekModal from '../components/PlanWeekModal'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { dashboardAPI } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 function Dashboard() {
+  const { isAuthenticated } = useAuth()
+  const [stats, setStats] = useState({
+    totalRecipes: 0,
+    favorites: 0,
+    avgTime: 0,
+    weeklyMeals: 0
+  })
+  const [recipeTypes, setRecipeTypes] = useState([])
+  const [favoritesByCategory, setFavoritesByCategory] = useState([])
+  const [recentActivity, setRecentActivity] = useState([])
+  const [mealPlan, setMealPlan] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [isPlanWeekModalOpen, setIsPlanWeekModalOpen] = useState(false)
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0)
+  const [allMealPlans, setAllMealPlans] = useState([])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchDashboardData()
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    updateCurrentWeekMealPlan()
+  }, [currentWeekOffset, allMealPlans])
+
+  const getWeekDates = (offset = 0) => {
+    const now = new Date()
+    const currentDay = now.getDay()
+    const diff = currentDay === 0 ? -6 : 1 - currentDay
+    const monday = new Date(now)
+    monday.setDate(now.getDate() + diff + (offset * 7))
+    monday.setHours(0, 0, 0, 0)
+    
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+    sunday.setHours(23, 59, 59, 999)
+    
+    return { start: monday, end: sunday }
+  }
+
+  const getWeekLabel = (offset) => {
+    if (offset === 0) return 'This Week'
+    if (offset === 1) return 'Next Week'
+    if (offset === -1) return 'Last Week'
+    
+    const { start, end } = getWeekDates(offset)
+    const startMonth = start.toLocaleString('default', { month: 'short' })
+    const endMonth = end.toLocaleString('default', { month: 'short' })
+    
+    if (startMonth === endMonth) {
+      return `${startMonth} ${start.getDate()}-${end.getDate()}`
+    }
+    return `${startMonth} ${start.getDate()} - ${endMonth} ${end.getDate()}`
+  }
+
+  const updateCurrentWeekMealPlan = () => {
+    const { start } = getWeekDates(currentWeekOffset)
+    const weekPlan = allMealPlans.find(plan => {
+      const planDate = new Date(plan.weekStartDate)
+      return Math.abs(planDate - start) < 24 * 60 * 60 * 1000
+    })
+    
+    if (weekPlan) {
+      setMealPlan(weekPlan.plan)
+    } else {
+      setMealPlan({})
+    }
+  }
+
+  const handlePreviousWeek = () => {
+    setCurrentWeekOffset(prev => prev - 1)
+  }
+
+  const handleNextWeek = () => {
+    setCurrentWeekOffset(prev => prev + 1)
+  }
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      const [statsRes, recipeTypesRes, favoritesCategoryRes, activityRes, mealPlansRes] = await Promise.all([
+        dashboardAPI.getStats().catch(() => ({ data: { stats: { totalRecipes: 0, favorites: 0, avgTime: 0, weeklyMeals: 0 } } })),
+        dashboardAPI.getRecipeTypes().catch(() => ({ data: { recipeTypes: {} } })),
+        dashboardAPI.getFavoritesByCategory().catch(() => ({ data: { favoritesByCategory: {} } })),
+        dashboardAPI.getRecentActivity().catch(() => ({ data: { activities: [] } })),
+        dashboardAPI.getAllMealPlans().catch(() => ({ data: { mealPlans: [] } }))
+      ])
+
+      setStats(statsRes.data.stats)
+      setAllMealPlans(mealPlansRes.data.mealPlans || [])
+
+      const types = Object.entries(recipeTypesRes.data.recipeTypes || {})
+        .filter(([key]) => ['Breakfast', 'Lunch', 'Dinner', 'Snacks'].includes(key))
+        .map(([label, count]) => {
+          const maxWidth = 250
+          const width = Math.min((count / 30) * maxWidth, maxWidth)
+          const colors = {
+            Breakfast: 'bg-orange-600',
+            Lunch: 'bg-orange-500',
+            Dinner: 'bg-orange-400',
+            Snacks: 'bg-orange-300'
+          }
+          return { label, count, width: `${width}px`, color: colors[label] || 'bg-orange-500' }
+        })
+      setRecipeTypes(types.length > 0 ? types : [
+        { label: 'Breakfast', count: 12, width: '120px', color: 'bg-orange-600' },
+        { label: 'Lunch', count: 18, width: '180px', color: 'bg-orange-500' },
+        { label: 'Dinner', count: 25, width: '250px', color: 'bg-orange-400' },
+        { label: 'Snacks', count: 8, width: '80px', color: 'bg-orange-300' }
+      ])
+
+      const favCats = Object.entries(favoritesCategoryRes.data.favoritesByCategory || {})
+        .filter(([key]) => ['Desserts', 'Mains', 'Sides', 'Appetizers', 'Salads'].includes(key))
+        .map(([label, count], index) => {
+          const colors = ['bg-orange-600', 'bg-orange-500', 'bg-orange-400', 'bg-orange-300', 'bg-orange-200']
+          return { label, count, color: colors[index] || 'bg-orange-500' }
+        })
+      setFavoritesByCategory(favCats.length > 0 ? favCats : [
+        { label: 'Desserts', count: 8, color: 'bg-orange-600' },
+        { label: 'Mains', count: 15, color: 'bg-orange-500' },
+        { label: 'Sides', count: 6, color: 'bg-orange-400' },
+        { label: 'Appetizers', count: 4, color: 'bg-orange-300' },
+        { label: 'Salads', count: 7, color: 'bg-orange-200' }
+      ])
+
+      setRecentActivity(activityRes.data.activities?.slice(0, 4) || [
+        { action: 'Created recipe', detail: 'Creamy Garlic Pasta • 2 days ago' },
+        { action: 'Added favorite', detail: 'Mediterranean Bowl • 4 days ago' },
+        { action: 'Completed meal', detail: 'Grilled Salmon • 5 days ago' },
+        { action: 'Planned week', detail: 'Week of Nov 4 • 1 week ago' }
+      ])
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getMealForDay = (day, mealType) => {
+    const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]
+    const meal = mealPlan[dayName]?.[mealType]
+    return meal?.title || getDefaultMeal(day, mealType)
+  }
+
+  const getDefaultMeal = (index, mealType) => {
+    const defaults = {
+      breakfast: ['Avocado Toast', 'Oatmeal Bowl', 'Smoothie Bowl', 'Pancakes', 'French Toast', 'Eggs Benedict', 'Waffles'],
+      lunch: ['Caesar Salad', 'Chicken Wrap', 'Quinoa Salad', 'Tomato Soup', 'Sushi Bowl', 'Greek Salad', 'Burrito Bowl'],
+      dinner: ['Grilled Salmon', 'Pasta Carbonara', 'Beef Stir Fry', 'Roasted Chicken', 'Margherita Pizza', 'BBQ Ribs', 'Lasagna']
+    }
+    return defaults[mealType]?.[index] || 'Not planned'
+  }
+
+  const handleMealPlanSave = (newMealPlan) => {
+    const { start } = getWeekDates(currentWeekOffset)
+    const newPlanEntry = {
+      weekStartDate: start.toISOString(),
+      plan: newMealPlan,
+      createdAt: new Date().toISOString()
+    }
+    
+    const updatedPlans = allMealPlans.filter(plan => {
+      const planDate = new Date(plan.weekStartDate)
+      return Math.abs(planDate - start) >= 24 * 60 * 60 * 1000
+    })
+    
+    updatedPlans.push(newPlanEntry)
+    setAllMealPlans(updatedPlans)
+    setMealPlan(newMealPlan)
+  }
+
   return (
     <div className="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans min-h-screen transition-colors">
       <Navbar />
+      <PlanWeekModal 
+        isOpen={isPlanWeekModalOpen} 
+        onClose={() => setIsPlanWeekModalOpen(false)} 
+        onSave={handleMealPlanSave}
+        weekStartDate={getWeekDates(currentWeekOffset).start.toISOString()}
+      />
       
       <div className="min-h-screen p-4 sm:p-6">
         <div className="max-w-[1600px] mx-auto">
@@ -35,7 +217,9 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 dark:text-dark-muted">Total Recipes</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">63</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">
+                    {loading ? '...' : stats.totalRecipes}
+                  </p>
                 </div>
               </motion.div>
 
@@ -53,7 +237,9 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 dark:text-dark-muted">Favorites</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">40</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">
+                    {loading ? '...' : stats.favorites}
+                  </p>
                 </div>
               </motion.div>
 
@@ -72,7 +258,9 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 dark:text-dark-muted">Avg Time</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">35m</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">
+                    {loading ? '...' : `${stats.avgTime}m`}
+                  </p>
                 </div>
               </motion.div>
 
@@ -93,7 +281,9 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 dark:text-dark-muted">This Week</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">21</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-dark-text">
+                    {loading ? '...' : stats.weeklyMeals}
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -111,19 +301,25 @@ function Dashboard() {
                   <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text">Weekly Meal Plan</h2>
                   <div className="flex items-center gap-2">
                     <motion.button
+                      onClick={handlePreviousWeek}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       className="p-1 border border-gray-300 dark:border-dark-border rounded hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
+                      aria-label="Previous week"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <polyline points="15 18 9 12 15 6"></polyline>
                       </svg>
                     </motion.button>
-                    <span className="text-sm font-medium px-3">This Week</span>
+                    <span className="text-sm font-medium px-3 min-w-[120px] text-center">
+                      {getWeekLabel(currentWeekOffset)}
+                    </span>
                     <motion.button
+                      onClick={handleNextWeek}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       className="p-1 border border-gray-300 dark:border-dark-border rounded hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
+                      aria-label="Next week"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <polyline points="9 18 15 12 9 6"></polyline>
@@ -147,37 +343,19 @@ function Dashboard() {
                         <div>
                           <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium mb-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-500">B</span>
                           <p className="text-xs text-gray-700 dark:text-dark-muted leading-tight">
-                            {index === 0 && 'Avocado Toast'}
-                            {index === 1 && 'Oatmeal Bowl'}
-                            {index === 2 && 'Smoothie Bowl'}
-                            {index === 3 && 'Pancakes'}
-                            {index === 4 && 'French Toast'}
-                            {index === 5 && 'Eggs Benedict'}
-                            {index === 6 && 'Waffles'}
+                            {getMealForDay(index, 'breakfast')}
                           </p>
                         </div>
                         <div>
                           <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium mb-0.5 bg-orange-200 dark:bg-orange-800/30 text-orange-800 dark:text-orange-400">L</span>
                           <p className="text-xs text-gray-700 dark:text-dark-muted leading-tight">
-                            {index === 0 && 'Caesar Salad'}
-                            {index === 1 && 'Chicken Wrap'}
-                            {index === 2 && 'Quinoa Salad'}
-                            {index === 3 && 'Tomato Soup'}
-                            {index === 4 && 'Sushi Bowl'}
-                            {index === 5 && 'Greek Salad'}
-                            {index === 6 && 'Burrito Bowl'}
+                            {getMealForDay(index, 'lunch')}
                           </p>
                         </div>
                         <div>
                           <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium mb-0.5 bg-orange-300 dark:bg-orange-700/30 text-orange-900 dark:text-orange-300">D</span>
                           <p className="text-xs text-gray-700 dark:text-dark-muted leading-tight">
-                            {index === 0 && 'Grilled Salmon'}
-                            {index === 1 && 'Pasta Carbonara'}
-                            {index === 2 && 'Beef Stir Fry'}
-                            {index === 3 && 'Roasted Chicken'}
-                            {index === 4 && 'Margherita Pizza'}
-                            {index === 5 && 'BBQ Ribs'}
-                            {index === 6 && 'Lasagna'}
+                            {getMealForDay(index, 'dinner')}
                           </p>
                         </div>
                       </div>
@@ -195,12 +373,7 @@ function Dashboard() {
                 >
                   <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text mb-4">Recipe Types</h2>
                   <div className="space-y-3">
-                    {[
-                      { label: 'Breakfast', count: 12, width: '120px', color: 'bg-orange-600' },
-                      { label: 'Lunch', count: 18, width: '180px', color: 'bg-orange-500' },
-                      { label: 'Dinner', count: 25, width: '250px', color: 'bg-orange-400' },
-                      { label: 'Snacks', count: 8, width: '80px', color: 'bg-orange-300' }
-                    ].map((item, index) => (
+                    {recipeTypes.map((item, index) => (
                       <motion.div
                         key={item.label}
                         initial={{ opacity: 0, x: -20 }}
@@ -234,13 +407,7 @@ function Dashboard() {
                 >
                   <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text mb-4">Favorites by Category</h2>
                   <div className="space-y-3">
-                    {[
-                      { label: 'Desserts', count: 8, color: 'bg-orange-600' },
-                      { label: 'Mains', count: 15, color: 'bg-orange-500' },
-                      { label: 'Sides', count: 6, color: 'bg-orange-400' },
-                      { label: 'Appetizers', count: 4, color: 'bg-orange-300' },
-                      { label: 'Salads', count: 7, color: 'bg-orange-200' }
-                    ].map((item, index) => (
+                    {favoritesByCategory.map((item, index) => (
                       <motion.div
                         key={item.label}
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -271,6 +438,7 @@ function Dashboard() {
                 <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text mb-4">Quick Actions</h2>
                 <div className="space-y-3">
                   <motion.button
+                    onClick={() => setIsPlanWeekModalOpen(true)}
                     whileHover={{ scale: 1.02, x: 5 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full py-3 px-4 border border-gray-300 dark:border-dark-border rounded-md hover:bg-gray-50 dark:hover:bg-dark-border transition-colors flex items-center gap-3 text-left"
@@ -338,19 +506,14 @@ function Dashboard() {
               >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-dark-text mb-3">Recent Activity</h3>
                 <div className="space-y-3">
-                  {[
-                    { action: 'Created recipe', detail: 'Creamy Garlic Pasta • 2 days ago' },
-                    { action: 'Added favorite', detail: 'Mediterranean Bowl • 4 days ago' },
-                    { action: 'Completed meal', detail: 'Grilled Salmon • 5 days ago' },
-                    { action: 'Planned week', detail: 'Week of Nov 4 • 1 week ago' }
-                  ].map((activity, index) => (
+                  {recentActivity.map((activity, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.9 + index * 0.1 }}
                       whileHover={{ x: 5 }}
-                      className={`text-xs text-gray-600 dark:text-dark-muted pb-2 ${index < 3 ? 'border-b border-gray-100 dark:border-dark-border' : ''} cursor-pointer`}
+                      className={`text-xs text-gray-600 dark:text-dark-muted pb-2 ${index < recentActivity.length - 1 ? 'border-b border-gray-100 dark:border-dark-border' : ''} cursor-pointer`}
                     >
                       <p className="font-medium text-gray-900 dark:text-dark-text">{activity.action}</p>
                       <p>{activity.detail}</p>

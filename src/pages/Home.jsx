@@ -2,12 +2,28 @@ import Navbar from '../components/Navbar'
 import HeroSection from '../components/HeroSection'
 import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import recipes from '../data/recipes.json'
+import { recipeAPI } from '../utils/api'
 
 function Home() {
   const [favorites, setFavorites] = useState([2, 4])
+  const [recipes, setRecipes] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await recipeAPI.getAll()
+        setRecipes(response.data.recipes)
+      } catch (error) {
+        console.error('Error fetching recipes:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchRecipes()
+  }, [])
 
   const toggleFavorite = (id) => {
     setFavorites(prev => 
