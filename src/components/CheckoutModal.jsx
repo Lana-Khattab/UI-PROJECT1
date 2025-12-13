@@ -143,7 +143,7 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                 </div>
               </motion.div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text mb-4">Please Sign In</h2>
-              <p className="text-gray-600 dark:text-dark-muted mb-6">You need to be signed in to place an order.</p>
+              <p className="text-gray-600 dark:text-white mb-6">You need to be signed in to place an order.</p>
               <div className="flex gap-3">
                 <motion.button
                   onClick={onClose}
@@ -198,7 +198,7 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                     transition={{ delay: 0.1 }}
                   >
                     <Truck className="w-6 h-6 text-orange-500" />
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text">Checkout</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white\">Checkout</h2>
                   </motion.div>
                   <motion.button
                     onClick={onClose}
@@ -227,10 +227,10 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                 </motion.div>
               )}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4 transition-colors">Personal Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Personal Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1 transition-colors">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       First Name *
                     </label>
                     <input
@@ -239,11 +239,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-dark-text rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1 transition-colors">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       Last Name *
                     </label>
                     <input
@@ -252,11 +252,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-dark-text rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       Email *
                     </label>
                     <input
@@ -265,11 +265,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       Phone Number *
                     </label>
                     <input
@@ -278,16 +278,16 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                 </div>
               </div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Shipping Address</h3>
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       Street Address *
                     </label>
                     <input
@@ -296,12 +296,12 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.address}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                         City *
                       </label>
                       <input
@@ -310,11 +310,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                         value={formData.city}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                         State/Province *
                       </label>
                       <input
@@ -323,11 +323,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                         value={formData.state}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                         ZIP/Postal Code *
                       </label>
                       <input
@@ -336,12 +336,12 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                         value={formData.zipCode}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                       Country *
                     </label>
                     <input
@@ -350,15 +350,15 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       value={formData.country}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                     />
                   </div>
                 </div>
               </div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Payment Method</h3>
                 <div className="space-y-3 mb-4">
-                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 transition-colors">
+                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:border-orange-500 dark:bg-dark-border transition-colors">
                     <input
                       type="radio"
                       name="paymentMethod"
@@ -367,10 +367,10 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-orange-500"
                     />
-                    <CreditCard className="w-5 h-5 text-gray-600" />
-                    <span className="font-medium text-gray-900">Credit/Debit Card</span>
+                    <CreditCard className="w-5 h-5 text-gray-600 dark:text-white" />
+                    <span className="font-medium text-gray-900 dark:text-white transition-colors">Credit/Debit Card</span>
                   </label>
-                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 transition-colors">
+                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:border-orange-500 dark:bg-dark-border transition-colors">
                     <input
                       type="radio"
                       name="paymentMethod"
@@ -379,9 +379,9 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-orange-500"
                     />
-                    <span className="font-medium text-gray-900">PayPal</span>
+                    <span className="font-medium text-gray-900 dark:text-white transition-colors">PayPal</span>
                   </label>
-                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 transition-colors">
+                  <label className="flex items-center gap-3 p-4 border-2 border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:border-orange-500 dark:bg-dark-border transition-colors">
                     <input
                       type="radio"
                       name="paymentMethod"
@@ -390,14 +390,14 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-orange-500"
                     />
-                    <span className="font-medium text-gray-900">Cash on Delivery</span>
+                    <span className="font-medium text-gray-900 dark:text-white transition-colors">Cash on Delivery</span>
                   </label>
                 </div>
 
                 {formData.paymentMethod === 'credit-card' && (
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                         Card Number *
                       </label>
                       <input
@@ -407,11 +407,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                         onChange={handleInputChange}
                         placeholder="1234 5678 9012 3456"
                         required={formData.paymentMethod === 'credit-card'}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                         Cardholder Name *
                       </label>
                       <input
@@ -420,12 +420,12 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                         value={formData.cardName}
                         onChange={handleInputChange}
                         required={formData.paymentMethod === 'credit-card'}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                           Expiry Date *
                         </label>
                         <input
@@ -435,11 +435,11 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                           onChange={handleInputChange}
                           placeholder="MM/YY"
                           required={formData.paymentMethod === 'credit-card'}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1 transition-colors">
                           CVV *
                         </label>
                         <input
@@ -450,31 +450,31 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
                           placeholder="123"
                           maxLength="3"
                           required={formData.paymentMethod === 'credit-card'}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                         />
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Summary</h3>
+              <div className="bg-gray-50 dark:bg-dark-border rounded-lg p-4 mb-6 transition-colors">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-3 transition-colors">Order Summary</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal:</span>
-                    <span className="font-semibold">${cartTotal?.subtotal || '0.00'}</span>
+                    <span className="text-gray-600 dark:text-white transition-colors">Subtotal:</span>
+                    <span className="font-semibold text-gray-900 dark:text-dark-text transition-colors">${cartTotal?.subtotal || '0.00'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax:</span>
-                    <span className="font-semibold">${cartTotal?.tax || '0.00'}</span>
+                    <span className="text-gray-600 dark:text-white transition-colors">Tax:</span>
+                    <span className="font-semibold text-gray-900 dark:text-dark-text transition-colors">${cartTotal?.tax || '0.00'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping:</span>
-                    <span className="font-semibold text-green-600">FREE</span>
+                    <span className="text-gray-600 dark:text-white transition-colors">Shipping:</span>
+                    <span className="font-semibold text-green-600 dark:text-green-400 transition-colors">FREE</span>
                   </div>
-                  <div className="border-t border-gray-300 pt-2 mt-2">
+                  <div className="border-t border-gray-300 dark:border-dark-text/20 pt-2 mt-2 transition-colors">
                     <div className="flex justify-between text-lg">
-                      <span className="font-bold text-gray-900">Total:</span>
+                      <span className="font-bold text-gray-900 dark:text-dark-text transition-colors">Total:</span>
                       <span className="font-bold text-orange-500">${cartTotal?.total || '0.00'}</span>
                     </div>
                   </div>
@@ -518,7 +518,7 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
               Order Confirmed!
             </motion.h2>
             <motion.p 
-              className="text-gray-600 dark:text-dark-muted text-lg mb-2 transition-colors"
+              className="text-gray-600 dark:text-white text-lg mb-2 transition-colors"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -526,7 +526,7 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
               Thank you for your purchase, {formData.firstName}!
             </motion.p>
             <motion.p 
-              className="text-gray-500 dark:text-dark-muted mb-6 transition-colors"
+              className="text-gray-500 dark:text-white mb-6 transition-colors"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -555,7 +555,7 @@ const CheckoutModal = ({ isOpen, onClose, cartTotal, onOrderComplete }) => {
               </p>
             </motion.div>
             <motion.p 
-              className="text-sm text-gray-500 dark:text-dark-muted transition-colors"
+              className="text-sm text-gray-500 dark:text-white transition-colors"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
