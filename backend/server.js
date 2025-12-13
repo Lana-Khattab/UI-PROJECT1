@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       recipes: '/api/recipes',
       users: '/api/users',
-      orders: '/api/orders'
+      orders: '/api/orders',
+      dashboard: '/api/dashboard'
     }
   });
 });
@@ -35,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

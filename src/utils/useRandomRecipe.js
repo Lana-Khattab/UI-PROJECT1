@@ -1,17 +1,32 @@
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import recipes from '../data/recipes.json'
+import { recipeAPI } from './api'
 
 export default function useRandomRecipe() {
   const navigate = useNavigate()
-  const maxId = recipes.length
+  const [recipeIds, setRecipeIds] = useState([])
+
+  useEffect(() => {
+    const fetchRecipeIds = async () => {
+      try {
+        const response = await recipeAPI.getAll()
+        const ids = response.data.recipes.map(r => r._id)
+        setRecipeIds(ids)
+      } catch (error) {
+        console.error('Error fetching recipes:', error)
+      }
+    }
+    fetchRecipeIds()
+  }, [])
 
   const goRandom = useCallback(
     () => {
-      const id = Math.floor(Math.random() * maxId) + 1
-      navigate(`/recipe/${id}`)
+      if (recipeIds.length > 0) {
+        const randomId = recipeIds[Math.floor(Math.random() * recipeIds.length)]
+        navigate(`/recipe/${randomId}`)
+      }
     },
-    [navigate, maxId]
+    [navigate, recipeIds]
   )
 
   return goRandom
