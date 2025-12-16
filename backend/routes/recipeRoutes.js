@@ -6,9 +6,11 @@ const {
   updateRecipe,
   deleteRecipe,
   addReview,
-  getRandomRecipe
+  getRandomRecipe,
+  uploadRecipeImage
 } = require('../controllers/recipeController');
 const { protect, optionalAuth } = require('../middlewares/auth');
+const upload = require('../middlewares/recipeUpload');
 
 const router = express.Router();
 
@@ -19,6 +21,8 @@ router.get('/random', getRandomRecipe);
 router.get('/:id', getRecipeById);
 
 router.post('/', protect, createRecipe);
+
+router.post('/upload-image', protect, upload.single('image'), uploadRecipeImage);
 
 router.put('/:id', protect, updateRecipe);
 

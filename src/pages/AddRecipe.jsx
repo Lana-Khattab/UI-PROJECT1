@@ -33,6 +33,7 @@ function AddRecipe() {
   const [currentIngredient, setCurrentIngredient] = useState('')
   const [instructions, setInstructions] = useState([''])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState('')
 
   const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack']
@@ -73,6 +74,43 @@ function AddRecipe() {
 
   const removeInstruction = (index) => {
     setInstructions(instructions.filter((_, i) => i !== index))
+  }
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please upload a valid image file (JPEG, PNG, GIF, or WebP)')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB')
+      return
+    }
+
+    try {
+      setUploadingImage(true)
+      setError('')
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await recipeAPI.uploadImage(formData)
+      if (response.data.success) {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+        const baseUrl = apiUrl.replace('/api', '')
+        const imageUrl = `${baseUrl}${response.data.imageUrl}`
+        
+        setFormData({ ...formData, imageUrl })
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      setError('Failed to upload image. Please try again.')
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -195,14 +233,46 @@ function AddRecipe() {
               </div>
 
               <div>
-                <label className="block font-medium mb-2 dark:text-white">Image URL</label>
-                <input 
-                  type="text" 
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                  className="w-full border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors" 
-                />
+                <label className="block font-medium mb-2 dark:text-white">Recipe Image</label>
+                <div className="space-y-3">
+                  {formData.imageUrl && (
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-300 dark:border-dark-border">
+                      <img 
+                        src={formData.imageUrl} 
+                        alt="Recipe preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      {uploadingImage && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <label 
+                      htmlFor="image-file-input" 
+                      className="cursor-pointer bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm flex-shrink-0"
+                    >
+                      {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                    </label>
+                    <input
+                      id="image-file-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Or paste image URL"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                      className="flex-1 border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors" 
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">

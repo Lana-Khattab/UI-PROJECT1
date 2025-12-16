@@ -169,3 +169,38 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    const user = await User.findById(req.user.id);
+    user.avatar = avatarUrl;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      avatar: avatarUrl,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

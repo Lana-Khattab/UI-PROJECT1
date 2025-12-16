@@ -38,7 +38,14 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
-  updateProfile: (data) => api.put('/auth/profile', data)
+  updateProfile: (data) => api.put('/auth/profile', data),
+  uploadAvatar: (formData) => {
+    return api.post('/auth/upload-avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };
 
 export const recipeAPI = {
@@ -48,7 +55,14 @@ export const recipeAPI = {
   update: (id, data) => api.put(`/recipes/${id}`, data),
   delete: (id) => api.delete(`/recipes/${id}`),
   addReview: (id, data) => api.post(`/recipes/${id}/reviews`, data),
-  getRandom: () => api.get('/recipes/random')
+  getRandom: () => api.get('/recipes/random'),
+  uploadImage: (formData) => {
+    return api.post('/recipes/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };
 
 export const userAPI = {
