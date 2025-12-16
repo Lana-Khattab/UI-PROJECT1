@@ -4,33 +4,63 @@ import Sidebar from '../components/Sidebar'
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { recipeAPI } from '../utils/api'
+import { recipeAPI, userAPI } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 function Home() {
+  const { isAuthenticated } = useAuth()
   const [favorites, setFavorites] = useState([])
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadRecipes = async () => {
-      try {
-        const response = await recipeAPI.getAll()
-        if (response.data.success) {
-          setRecipes(response.data.recipes)
-        }
-      } catch (error) {
-        console.error('Error loading recipes:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
     loadRecipes()
-  }, [])
+    if (isAuthenticated) {
+      loadFavorites()
+    }
+  }, [isAuthenticated])
 
-  const toggleFavorite = (id) => {
-    setFavorites(prev => 
-      prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
-    )
+  const loadRecipes = async () => {
+    try {
+      const response = await recipeAPI.getAll()
+      if (response.data.success) {
+        setRecipes(response.data.recipes)
+      }
+    } catch (error) {
+      console.error('Error loading recipes:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadFavorites = async () => {
+    try {
+      const response = await userAPI.getFavorites()
+      if (response.data.success) {
+        setFavorites(response.data.favorites.map(fav => fav._id))
+      }
+    } catch (error) {
+      console.error('Error loading favorites:', error)
+    }
+  }
+
+  const toggleFavorite = async (id) => {
+    if (!isAuthenticated) {
+      alert('Please login to add favorites')
+      return
+    }
+
+    try {
+      if (favorites.includes(id)) {
+        await userAPI.removeFromFavorites(id)
+        setFavorites(prev => prev.filter(fav => fav !== id))
+      } else {
+        await userAPI.addToFavorites(id)
+        setFavorites(prev => [...prev, id])
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
   }
 
   const topRecipes = useMemo(() => recipes.slice(0, 3), [recipes])

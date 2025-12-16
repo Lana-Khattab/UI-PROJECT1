@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext'
 
 function RecipeDetails() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [recipe, setRecipe] = useState(null)
   const [loading, setLoading] = useState(true)
   const [collections, setCollections] = useState([])
@@ -237,9 +237,8 @@ function RecipeDetails() {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-dark-text">
               {recipe.title}
             </h1>
-
-            <div className="flex items-center gap-4 text-gray-700 dark:text-dark-muted">
-              <p className="text-base">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <p className="text-sm text-gray-600 dark:text-dark-muted">
                 by <span className="font-semibold text-gray-900 dark:text-dark-text">{recipe.chef}</span>
               </p>
               
