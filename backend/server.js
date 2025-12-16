@@ -8,6 +8,7 @@ const recipeRoutes = require('./routes/recipeRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 
@@ -28,7 +29,8 @@ app.get('/', (req, res) => {
       recipes: '/api/recipes',
       users: '/api/users',
       orders: '/api/orders',
-      dashboard: '/api/dashboard'
+      dashboard: '/api/dashboard',
+      products: '/api/products'
     }
   });
 });
@@ -38,6 +40,7 @@ app.use('/api/recipes', recipeRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/products', productRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
