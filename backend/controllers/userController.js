@@ -26,8 +26,7 @@ exports.addToFavorites = async (req, res) => {
     user.favorites.push(recipeId);
     await user.save();
 
-    // Create notification for the recipe owner
-    if (recipe.userId._id.toString() !== req.user.id) {
+    if (recipe.userId && recipe.userId._id && recipe.userId._id.toString() !== req.user.id) {
       await createNotification(
         recipe.userId._id,
         'like',
@@ -45,6 +44,7 @@ exports.addToFavorites = async (req, res) => {
       favorites: user.favorites
     });
   } catch (error) {
+    console.error('Add to favorites error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -63,11 +63,19 @@ exports.removeFromFavorites = async (req, res) => {
       { new: true }
     );
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
     res.status(200).json({
       success: true,
       favorites: user.favorites
     });
   } catch (error) {
+    console.error('Remove from favorites error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',

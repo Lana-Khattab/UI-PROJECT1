@@ -7,28 +7,43 @@ const seedRecipes = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/foodies');
     console.log('Connected to MongoDB');
 
-    await Recipe.deleteMany({});
-    console.log('Cleared existing recipes');
+    let addedCount = 0;
+    let skippedCount = 0;
 
-    const recipes = recipesData.map(recipe => ({
-      title: recipe.title,
-      chef: recipe.chef,
-      image: recipe.image,
-      time: recipe.time,
-      servings: recipe.servings,
-      rating: recipe.rating,
-      reviewsCount: recipe.reviewsCount,
-      reviews: recipe.reviews || [],
-      ingredients: recipe.ingredients,
-      instructions: recipe.instructions,
-      nutrition: recipe.nutrition,
-      tags: recipe.tags,
-      season: recipe.season,
-      mood: recipe.mood
-    }));
+    for (const recipeData of recipesData) {
+      const existingRecipe = await Recipe.findOne({ title: recipeData.title });
+      
+      if (existingRecipe) {
+        console.log(`Skipping duplicate: ${recipeData.title}`);
+        skippedCount++;
+        continue;
+      }
 
-    const insertedRecipes = await Recipe.insertMany(recipes);
-    console.log(`Successfully seeded ${insertedRecipes.length} recipes`);
+      const recipe = {
+        title: recipeData.title,
+        chef: recipeData.chef,
+        image: recipeData.image,
+        time: recipeData.time,
+        servings: recipeData.servings,
+        rating: recipeData.rating,
+        reviewsCount: recipeData.reviewsCount,
+        reviews: recipeData.reviews || [],
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        nutrition: recipeData.nutrition,
+        tags: recipeData.tags,
+        season: recipeData.season,
+        mood: recipeData.mood,
+        difficulty: recipeData.difficulty,
+        cuisine: recipeData.cuisine
+      };
+
+      await Recipe.create(recipe);
+      console.log(`Added: ${recipeData.title}`);
+      addedCount++;
+    }
+
+    console.log(`\nSeeding complete: ${addedCount} recipes added, ${skippedCount} duplicates skipped`);
 
     await mongoose.connection.close();
     console.log('Database connection closed');
