@@ -75,4 +75,21 @@ export const orderAPI = {
   cancel: (id) => api.put(`/orders/${id}/cancel`)
 };
 
+export const dashboardAPI = {
+  getStats: () => api.get('/dashboard/stats'),
+  getRecipeTypes: () => api.get('/dashboard/recipe-types'),
+  getFavoritesByCategory: () => api.get('/dashboard/favorites-by-category'),
+  getRecentActivity: () => api.get('/dashboard/recent-activity'),
+  getWeeklyMealPlan: () => api.get('/dashboard/meal-plan'),
+  getAllMealPlans: () => api.get('/dashboard/meal-plans'),
+  saveMealPlan: (mealPlan, weekStartDate) => api.post('/dashboard/meal-plan', { mealPlan, weekStartDate })
+};
+
+export const notificationAPI = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.put('/notifications/mark-all-as-read'),
+  delete: (notificationId) => api.delete(`/notifications/${notificationId}`)
+};
+
 export default api;

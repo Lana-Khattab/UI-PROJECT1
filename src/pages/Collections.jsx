@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import { recipeAPI } from '../utils/api'
 
 function Collections() {
   const [collections, setCollections] = useState([])
+  const [recipes, setRecipes] = useState([])
   const [newCollectionName, setNewCollectionName] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingCollection, setEditingCollection] = useState(null)

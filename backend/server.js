@@ -8,6 +8,8 @@ const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -34,7 +36,9 @@ app.get('/', (req, res) => {
       recipes: '/api/recipes',
       users: '/api/users',
       orders: '/api/orders',
-      collections: '/api/collections'
+      collections: '/api/collections',
+      dashboard: '/api/dashboard',
+      notifications: '/api/notifications'
     }
   });
 });
@@ -44,6 +48,8 @@ app.use('/api/recipes', recipeRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/collections', collectionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

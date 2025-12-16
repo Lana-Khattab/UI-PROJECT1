@@ -1,11 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { notificationAPI } from '../utils/api'
 
 function NotificationsModal({ isOpen, onClose, notifications, setNotifications }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      fetchNotifications()
     } else {
       document.body.style.overflow = 'unset'
     }
@@ -14,12 +18,33 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
     }
   }, [isOpen])
 
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const response = await notificationAPI.getAll()
+      if (response.data.success) {
+        setNotifications(response.data.notifications)
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err)
+      setError('Failed to load notifications')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (!isOpen) return null
 
   const unreadCount = notifications.filter(n => !n.read).length
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })))
+  const markAllAsRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead()
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+    } catch (err) {
+      console.error('Error marking all as read:', err)
+    }
   }
 
   const getNotificationIcon = (type) => {
@@ -64,10 +89,11 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
       )
     }
     
+    const senderName = notification.sender?.name || 'N'
     return (
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
         <span className="text-sm font-bold text-white">
-          {notification.user ? notification.user.split(' ').map(n => n[0]).join('').slice(0, 2) : 'N'}
+          {senderName.split(' ').map(n => n[0]).join('').slice(0, 2)}
         </span>
       </div>
     )
@@ -121,42 +147,60 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
             </div>
 
             <div className="overflow-y-auto flex-1">
-              <AnimatePresence>
-                {notifications.map((notification, index) => (
-                  <motion.div 
-                    key={notification.id}
-                    className={`p-4 border-b dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-border transition-colors ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    layout
-                  >
-                    <div className="flex gap-3">
-                      <motion.div 
-                        className="flex-shrink-0"
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: 'spring', stiffness: 400 }}
-                      >
-                        {getUserAvatar(notification)}
-                      </motion.div>
+              {loading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                </div>
+              ) : error ? (
+                <div className="p-4 text-center text-red-500 dark:text-red-400">
+                  {error}
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                  </svg>
+                  <p>No notifications yet</p>
+                </div>
+              ) : (
+                <AnimatePresence>
+                  {notifications.map((notification, index) => (
+                    <motion.div 
+                      key={notification._id}
+                      className={`p-4 border-b dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-border transition-colors ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      layout
+                    >
+                      <div className="flex gap-3">
+                        <motion.div 
+                          className="flex-shrink-0"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ type: 'spring', stiffness: 400 }}
+                        >
+                          {getUserAvatar(notification)}
+                        </motion.div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="text-sm text-gray-900 dark:text-dark-text">
-                              {notification.user && (
-                                <span className="font-semibold">{notification.user} </span>
+                              {notification.sender?.name && (
+                                <span className="font-semibold">{notification.sender.name} </span>
                               )}
                               <span className="text-gray-700 dark:text-dark-muted">{notification.action}</span>
-                              {notification.recipe && (
-                                <span className="font-medium"> {notification.recipe}</span>
+                              {notification.relatedRecipe?.title && (
+                                <span className="font-medium"> {notification.relatedRecipe.title}</span>
                               )}
                             </p>
                             {notification.comment && (
                               <p className="text-sm text-gray-600 dark:text-dark-muted mt-1 italic">"{notification.comment}"</p>
                             )}
-                            <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">{notification.time}</p>
+                            <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">
+                              {new Date(notification.createdAt).toLocaleDateString()}
+                            </p>
                           </div>
                           
                           <motion.div 
@@ -172,7 +216,8 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
                     </div>
                   </motion.div>
                 ))}
-              </AnimatePresence>
+                </AnimatePresence>
+              )}
             </div>
 
             <motion.div 

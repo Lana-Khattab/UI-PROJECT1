@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const { createNotification } = require('./notificationController');
 
 exports.createOrder = async (req, res) => {
   try {
@@ -19,6 +20,18 @@ exports.createOrder = async (req, res) => {
       paymentMethod,
       status: 'pending'
     });
+
+    // Create notification for the user
+    await createNotification(
+      req.user._id,
+      'order',
+      'Your order has been placed successfully',
+      {
+        relatedOrder: order._id,
+        action: 'placed an order',
+        message: `Order total: $${totalAmount}`
+      }
+    );
 
     res.status(201).json({
       success: true,
@@ -111,6 +124,24 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    // Create notification for status update
+    const statusMessages = {
+      confirmed: 'Your order has been confirmed',
+      shipped: 'Your order has been shipped',
+      delivered: 'Your order has been delivered',
+      cancelled: 'Your order has been cancelled'
+    };
+
+    await createNotification(
+      order.userId,
+      'order',
+      statusMessages[status] || `Order status updated to ${status}`,
+      {
+        relatedOrder: order._id,
+        action: `order status changed to ${status}`
+      }
+    );
 
     res.status(200).json({
       success: true,

@@ -16,6 +16,21 @@ const collectionSchema = new mongoose.Schema({
   }
 });
 
+const mealPlanSchema = new mongoose.Schema({
+  weekStartDate: {
+    type: Date,
+    default: Date.now
+  },
+  plan: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -48,6 +63,7 @@ const userSchema = new mongoose.Schema({
     ref: 'Recipe'
   }],
   collections: [collectionSchema],
+  mealPlans: [mealPlanSchema],
   createdRecipes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Recipe'
