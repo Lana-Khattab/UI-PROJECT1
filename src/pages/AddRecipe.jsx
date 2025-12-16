@@ -94,16 +94,16 @@ function AddRecipe() {
     try {
       setUploadingImage(true)
       setError('')
-      const formData = new FormData()
-      formData.append('image', file)
+      const uploadFormData = new FormData()
+      uploadFormData.append('image', file)
 
-      const response = await recipeAPI.uploadImage(formData)
+      const response = await recipeAPI.uploadImage(uploadFormData)
       if (response.data.success) {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
         const baseUrl = apiUrl.replace('/api', '')
         const imageUrl = `${baseUrl}${response.data.imageUrl}`
         
-        setFormData({ ...formData, imageUrl })
+        setFormData(prev => ({ ...prev, imageUrl }))
       }
     } catch (error) {
       console.error('Error uploading image:', error)
