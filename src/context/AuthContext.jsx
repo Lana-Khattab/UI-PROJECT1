@@ -57,7 +57,14 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed';
+      let message = 'Registration failed';
+      
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        message = err.response.data.errors.map(e => e.msg).join(', ');
+      } else if (err.response?.data?.message) {
+        message = err.response.data.message;
+      }
+      
       setError(message);
       return { success: false, error: message };
     }
@@ -75,7 +82,14 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      const message = err.response?.data?.message || 'Login failed';
+      let message = 'Login failed';
+      
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        message = err.response.data.errors.map(e => e.msg).join(', ');
+      } else if (err.response?.data?.message) {
+        message = err.response.data.message;
+      }
+      
       setError(message);
       return { success: false, error: message };
     }

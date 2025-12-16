@@ -38,7 +38,14 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
-  updateProfile: (data) => api.put('/auth/profile', data)
+  updateProfile: (data) => api.put('/auth/profile', data),
+  uploadAvatar: (formData) => {
+    return api.post('/auth/upload-avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };
 
 export const recipeAPI = {
@@ -48,7 +55,14 @@ export const recipeAPI = {
   update: (id, data) => api.put(`/recipes/${id}`, data),
   delete: (id) => api.delete(`/recipes/${id}`),
   addReview: (id, data) => api.post(`/recipes/${id}/reviews`, data),
-  getRandom: () => api.get('/recipes/random')
+  getRandom: () => api.get('/recipes/random'),
+  uploadImage: (formData) => {
+    return api.post('/recipes/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };
 
 export const userAPI = {
@@ -64,6 +78,16 @@ export const userAPI = {
     api.post('/users/collections/recipes', { collectionId, recipeId }),
   removeRecipeFromCollection: (collectionId, recipeId) => 
     api.delete(`/users/collections/${collectionId}/recipes/${recipeId}`)
+};
+
+export const collectionAPI = {
+  getMyCollections: () => api.get('/collections/my-collections'),
+  getById: (id) => api.get(`/collections/${id}`),
+  create: (data) => api.post('/collections', data),
+  update: (id, data) => api.put(`/collections/${id}`, data),
+  delete: (id) => api.delete(`/collections/${id}`),
+  addRecipe: (collectionId, recipeId) => api.post(`/collections/${collectionId}/add-recipe`, { recipeId }),
+  removeRecipe: (collectionId, recipeId) => api.post(`/collections/${collectionId}/remove-recipe`, { recipeId })
 };
 
 export const orderAPI = {
@@ -83,6 +107,13 @@ export const dashboardAPI = {
   getWeeklyMealPlan: () => api.get('/dashboard/meal-plan'),
   getAllMealPlans: () => api.get('/dashboard/meal-plans'),
   saveMealPlan: (mealPlan, weekStartDate) => api.post('/dashboard/meal-plan', { mealPlan, weekStartDate })
+};
+
+export const notificationAPI = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.put('/notifications/mark-all-as-read'),
+  delete: (notificationId) => api.delete(`/notifications/${notificationId}`)
 };
 
 export default api;

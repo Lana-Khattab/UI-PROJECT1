@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { authAPI, userAPI } from '../utils/api'
 
 function Profile() {
-  const { user: authUser, updateProfile: updateAuthProfile } = useAuth()
+  const { user: authUser, updateProfile: updateAuthProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -14,6 +14,7 @@ function Profile() {
   const [recipes, setRecipes] = useState([])
   const [favorites, setFavorites] = useState([])
   const [isEditing, setIsEditing] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [editForm, setEditForm] = useState({
     name: '',
     bio: '',
@@ -21,12 +22,20 @@ function Profile() {
   })
 
   useEffect(() => {
+    if (authLoading) {
+      console.log('Auth still loading, waiting...')
+      return
+    }
+    
     if (!authUser) {
+      console.log('No auth user found, redirecting to login')
       navigate('/login')
       return
     }
+    
+    console.log('Auth user found:', authUser)
     fetchUserData()
-  }, [authUser, navigate])
+  }, [authUser, authLoading, navigate])
 
   const fetchUserData = async () => {
     try {
@@ -75,6 +84,44 @@ function Profile() {
     }
   }
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPEG, PNG, GIF, or WebP)')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    try {
+      setUploadingAvatar(true)
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await authAPI.uploadAvatar(formData)
+      if (response.data.success) {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+        const baseUrl = apiUrl.replace('/api', '')
+        const avatarUrl = `${baseUrl}${response.data.avatar}`
+        
+        setUser({ ...user, avatar: avatarUrl })
+        setEditForm({ ...editForm, avatar: avatarUrl })
+        await updateAuthProfile({ ...editForm, avatar: avatarUrl })
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      alert('Failed to upload avatar. Please try again.')
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
   const getInitials = (name) => {
     if (!name) return 'U'
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -87,7 +134,7 @@ function Profile() {
     return parsedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans min-h-screen transition-colors">
         <Navbar />
@@ -138,18 +185,39 @@ function Profile() {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <div className="flex flex-col items-center">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-28 h-28 rounded-full object-cover mb-3" />
-                  ) : (
-                    <div className="w-28 h-28 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center text-3xl font-semibold mb-3">
-                      {getInitials(user.name)}
-                    </div>
-                  )}
+                  <div className="relative mb-3">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-28 h-28 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-28 h-28 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center text-3xl font-semibold">
+                        {getInitials(user.name)}
+                      </div>
+                    )}
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      </div>
+                    )}
+                  </div>
+                  <label 
+                    htmlFor="avatar-file-input" 
+                    className="cursor-pointer bg-orange-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-orange-600 transition-colors mb-2"
+                  >
+                    {uploadingAvatar ? 'Uploading...' : 'Upload Image'}
+                  </label>
+                  <input
+                    id="avatar-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                  />
                   <label htmlFor="avatar-input" className="sr-only">Avatar URL</label>
                   <input
                     id="avatar-input"
                     type="text"
-                    placeholder="Avatar URL"
+                    placeholder="Or paste image URL"
                     value={editForm.avatar}
                     onChange={(e) => setEditForm({ ...editForm, avatar: e.target.value })}
                     className="border border-gray-300 dark:border-dark-border dark:bg-dark-border dark:text-dark-text rounded-md px-3 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"

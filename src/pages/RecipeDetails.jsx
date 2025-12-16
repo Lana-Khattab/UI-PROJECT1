@@ -2,7 +2,8 @@ import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
-import { recipeAPI, userAPI } from '../utils/api'
+import PlanWeekModal from '../components/PlanWeekModal'
+import { recipeAPI, userAPI, collectionAPI } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 
 function RecipeDetails() {
@@ -17,7 +18,9 @@ function RecipeDetails() {
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [isFavorited, setIsFavorited] = useState(false)
-  const [favorites, setFavorites] = useState([])
+  const [favoritesLoading, setFavoritesLoading] = useState(false)
+  const [showMealPlanModal, setShowMealPlanModal] = useState(false)
+  const [collectionsLoading, setCollectionsLoading] = useState(false)
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -39,69 +42,100 @@ function RecipeDetails() {
   }, [id])
 
   useEffect(() => {
-    const savedCollections = localStorage.getItem('recipe-collections')
-    if (savedCollections) {
-      setCollections(JSON.parse(savedCollections))
+    const fetchCollections = async () => {
+      if (!user) {
+        setCollections([])
+        setCollectionsLoading(false)
+        return
+      }
+
+      try {
+        setCollectionsLoading(true)
+        const response = await collectionAPI.getMyCollections()
+        if (response.data.success) {
+          setCollections(response.data.collections)
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error)
+        setCollections([])
+      } finally {
+        setCollectionsLoading(false)
+      }
     }
 
-    if (isAuthenticated) {
-      loadFavorites()
-    }
-  }, [isAuthenticated])
+    fetchCollections()
+  }, [user])
 
   useEffect(() => {
-    if (id && favorites.length > 0) {
-      setIsFavorited(favorites.includes(id))
-    }
-  }, [id, favorites])
-
-  const loadFavorites = async () => {
-    try {
-      const response = await userAPI.getFavorites()
-      if (response.data.success) {
-        setFavorites(response.data.favorites.map(fav => fav._id))
+    const checkIfFavorited = async () => {
+      if (!user) {
+        setIsFavorited(false)
+        return
       }
-    } catch (error) {
-      console.error('Error loading favorites:', error)
+
+      try {
+        const response = await userAPI.getFavorites()
+        if (response.data.success) {
+          const favoriteIds = response.data.favorites.map(fav => fav._id || fav)
+          setIsFavorited(favoriteIds.includes(id))
+        }
+      } catch (error) {
+        console.error('Error checking favorites:', error)
+      }
     }
-  }
+
+    checkIfFavorited()
+  }, [user, id])
 
   const toggleFavorite = async () => {
-    if (!isAuthenticated) {
-      alert('Please login to add favorites')
+    if (!user) {
+      setReviewError('Please login to add favorites')
       return
     }
 
+    setFavoritesLoading(true)
     try {
       if (isFavorited) {
         await userAPI.removeFromFavorites(id)
-        setFavorites(prev => prev.filter(fav => fav !== id))
         setIsFavorited(false)
       } else {
         await userAPI.addToFavorites(id)
-        setFavorites(prev => [...prev, id])
         setIsFavorited(true)
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
+      setReviewError(error.response?.data?.message || 'Failed to update favorites')
+    } finally {
+      setFavoritesLoading(false)
     }
   }
 
-  const addToCollection = (collectionId) => {
-    const updatedCollections = collections.map(collection => {
-      if (collection.id === collectionId && !collection.recipeIds.includes(parseInt(id))) {
-        return { ...collection, recipeIds: [...collection.recipeIds, parseInt(id)] }
+  const addToCollection = async (collectionId) => {
+    if (!user) {
+      setReviewError('Please login to add to collection')
+      return
+    }
+
+    try {
+      const response = await collectionAPI.addRecipe(collectionId, id)
+      if (response.data.success) {
+        const updatedResponse = await collectionAPI.getMyCollections()
+        if (updatedResponse.data.success) {
+          setCollections(updatedResponse.data.collections)
+        }
+        setShowCollectionDropdown(false)
       }
-      return collection
-    })
-    setCollections(updatedCollections)
-    localStorage.setItem('recipe-collections', JSON.stringify(updatedCollections))
-    setShowCollectionDropdown(false)
+    } catch (error) {
+      console.error('Error adding to collection:', error)
+      setReviewError(error.response?.data?.message || 'Failed to add to collection')
+    }
   }
 
   const isInCollection = (collectionId) => {
-    const collection = collections.find(c => c.id === collectionId)
-    return collection ? collection.recipeIds.includes(parseInt(id)) : false
+    const collection = collections.find(c => c._id === collectionId)
+    if (!collection || !collection.recipes) return false
+    const recipeIds = collection.recipes.map(r => typeof r === 'string' ? r : r._id)
+    return recipeIds.includes(id)
   }
 
   const handleSubmitReview = async () => {
@@ -218,7 +252,7 @@ function RecipeDetails() {
         </div>
       </motion.section>
 
-      <section className="max-w-6xl mx-auto px-6 py-0">
+      <section className="max-w-6xl mx-auto px-6 pb-12">
         <motion.div 
           className="bg-white dark:bg-dark-card rounded-2xl shadow-sm dark:shadow-orange-500/5 p-8 flex flex-col md:flex-row justify-between items-center gap-8 border dark:border-dark-border transition-colors"
           initial={{ y: 20, opacity: 0 }}
@@ -243,14 +277,26 @@ function RecipeDetails() {
           <nav className="flex gap-3 w-full md:w-auto" aria-label="Recipe actions">
             <motion.button 
               onClick={toggleFavorite}
-              className={`${isFavorited ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-900 dark:bg-orange-600 hover:bg-gray-800 dark:hover:bg-orange-700'} text-white px-6 py-2 rounded-md w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              disabled={favoritesLoading || !user}
+              className={`${
+                isFavorited 
+                  ? 'bg-orange-600 text-white hover:bg-orange-700' 
+                  : 'bg-gray-900 dark:bg-orange-600 text-white hover:bg-gray-800 dark:hover:bg-orange-700'
+              } px-6 py-2 rounded-md w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+              whileHover={{ scale: favoritesLoading || !user ? 1 : 1.02 }}
+              whileTap={{ scale: favoritesLoading || !user ? 1 : 0.98 }}
               aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
             >
-              {isFavorited ? '❤️ Favorited' : 'Favorite'}
+              {favoritesLoading ? 'Loading...' : isFavorited ? '❤️ Favorited' : '🤍 Favorite'}
             </motion.button>
             <motion.button 
+              onClick={() => {
+                if (!user) {
+                  setReviewError('Please login to add to meal plan')
+                  return
+                }
+                setShowMealPlanModal(true)
+              }}
               className="border border-gray-900 dark:border-dark-border text-gray-900 dark:text-dark-text px-6 py-2 rounded-md w-full md:w-auto hover:bg-gray-50 dark:hover:bg-dark-border focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -288,25 +334,29 @@ function RecipeDetails() {
                       <p className="text-xs text-gray-500 dark:text-dark-muted mt-1">Add this recipe to a collection</p>
                     </div>
                     <div className="max-h-48 overflow-y-auto">
-                      {collections.length === 0 ? (
+                      {collectionsLoading ? (
+                        <div className="p-3 text-center">
+                          <p className="text-sm text-gray-500 dark:text-dark-muted">Loading collections...</p>
+                        </div>
+                      ) : collections.length === 0 ? (
                         <div className="p-3 text-center">
                           <p className="text-sm text-gray-500 dark:text-dark-muted">No collections yet</p>
                         </div>
                       ) : (
                         collections.map((collection) => (
                           <button
-                            key={collection.id}
-                            onClick={() => addToCollection(collection.id)}
-                            disabled={isInCollection(collection.id)}
+                            key={collection._id}
+                            onClick={() => addToCollection(collection._id)}
+                            disabled={isInCollection(collection._id)}
                             className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-dark-border dark:text-dark-text flex items-center justify-between transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-dark-border ${
-                              isInCollection(collection.id) ? 'opacity-50 cursor-not-allowed' : ''
+                              isInCollection(collection._id) ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full ${collection.color.replace('bg-', 'bg-').split(' ')[0]}`} aria-hidden="true"></div>
+                              <div className="w-3 h-3 rounded-full bg-orange-500" aria-hidden="true"></div>
                               <span>{collection.name}</span>
                             </div>
-                            {isInCollection(collection.id) && (
+                            {isInCollection(collection._id) && (
                               <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Already in collection">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                               </svg>
@@ -570,6 +620,16 @@ function RecipeDetails() {
           </div>
         </motion.div>
       </section>
+
+      <PlanWeekModal 
+        isOpen={showMealPlanModal}
+        onClose={() => setShowMealPlanModal(false)}
+        onSave={(mealPlan) => {
+          console.log('Meal plan saved:', mealPlan)
+          setShowMealPlanModal(false)
+        }}
+        weekStartDate={new Date()}
+      />
     </div>
   )
 }

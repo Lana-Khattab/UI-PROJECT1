@@ -1,5 +1,6 @@
-    const Recipe = require('../models/Recipe');
+const Recipe = require('../models/Recipe');
 const User = require('../models/User');
+const { createNotification } = require('./notificationController');
 
 exports.getAllRecipes = async (req, res) => {
   try {
@@ -205,7 +206,7 @@ exports.deleteRecipe = async (req, res) => {
 exports.addReview = async (req, res) => {
   try {
     const { text } = req.body;
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(req.params.id).populate('userId');
 
     if (!recipe) {
       return res.status(404).json({
@@ -225,6 +226,21 @@ exports.addReview = async (req, res) => {
     recipe.reviewsCount = recipe.reviews.length;
 
     await recipe.save();
+
+    // Create notification for the recipe owner
+    if (recipe.userId._id.toString() !== req.user.id) {
+      await createNotification(
+        recipe.userId._id,
+        'comment',
+        `${req.user.name} commented on your recipe`,
+        {
+          sender: req.user.id,
+          relatedRecipe: recipe._id,
+          action: 'commented on',
+          comment: text
+        }
+      );
+    }
 
     res.status(201).json({
       success: true,
@@ -248,6 +264,30 @@ exports.getRandomRecipe = async (req, res) => {
     res.status(200).json({
       success: true,
       recipe
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+exports.uploadRecipeImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const imageUrl = `/uploads/recipes/${req.file.filename}`;
+
+    res.status(200).json({
+      success: true,
+      imageUrl
     });
   } catch (error) {
     res.status(500).json({

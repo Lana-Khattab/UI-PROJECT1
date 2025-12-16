@@ -1,7 +1,8 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { register, login, getMe, updateProfile } = require('../controllers/authController');
-const { protect } = require('../middlewares/auth');
+const { register, login, getMe, updateProfile, uploadAvatar } = require('../controllers/authController');
+const auth = require('../middlewares/auth');
+const upload = require('../middlewares/upload');
 
 const router = express.Router();
 
@@ -24,8 +25,10 @@ router.post(
   login
 );
 
-router.get('/me', protect, getMe);
+router.get('/me', auth.protect, getMe);
 
-router.put('/profile', protect, updateProfile);
+router.put('/profile', auth.protect, updateProfile);
+
+router.post('/upload-avatar', auth.protect, upload.single('avatar'), uploadAvatar);
 
 module.exports = router;
