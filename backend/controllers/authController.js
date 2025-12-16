@@ -12,6 +12,7 @@ exports.register = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({
         success: false,
         errors: errors.array()
@@ -19,6 +20,7 @@ exports.register = async (req, res) => {
     }
 
     const { name, email, password } = req.body;
+    console.log('Register attempt:', { name, email });
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -48,6 +50,7 @@ exports.register = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
