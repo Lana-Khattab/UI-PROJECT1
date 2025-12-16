@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, X, Moon, Sun } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { notificationAPI } from '../utils/api'
 import NotificationsModal from './NotificationsModal'
 import CartModal from './CartModal'
 
@@ -13,81 +14,31 @@ function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'like',
-      user: 'Farida Hassan',
-      action: 'liked your recipe',
-      recipe: 'Koshari',
-      time: '5 minutes ago',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'comment',
-      user: 'Omar Mahmoud',
-      action: 'commented on',
-      recipe: 'Mahshi Warak Enab',
-      comment: 'This looks amazing! Can\'t wait to try it.',
-      time: '1 hour ago',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'follow',
-      user: 'Nour El-Din',
-      action: 'started following you',
-      time: '2 hours ago',
-      read: false
-    },
-    {
-      id: 4,
-      type: 'like',
-      user: 'Ahmed Mostafa',
-      action: 'liked your recipe',
-      recipe: 'Fattah',
-      time: '3 hours ago',
-      read: true
-    },
-    {
-      id: 5,
-      type: 'comment',
-      user: 'Yasmin Ibrahim',
-      action: 'commented on',
-      recipe: 'Mahalabia',
-      comment: 'Perfect dessert! Looks delicious.',
-      time: '5 hours ago',
-      read: true
-    },
-    {
-      id: 6,
-      type: 'milestone',
-      action: 'Your recipe reached 100 likes!',
-      recipe: 'Molokheya',
-      time: '1 day ago',
-      read: true
-    },
-    {
-      id: 7,
-      type: 'like',
-      user: 'Karim Abdel Aziz',
-      action: 'liked your recipe',
-      recipe: 'Hawawshi',
-      time: '2 days ago',
-      read: true
-    },
-    {
-      id: 8,
-      type: 'follow',
-      user: 'Salma Youssef',
-      action: 'started following you',
-      time: '3 days ago',
-      read: true
-    }
-  ])
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications()
+    }
+  }, [isAuthenticated])
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await notificationAPI.getAll()
+      if (response.data.success) {
+        setNotifications(response.data.notifications)
+        const unread = response.data.notifications.filter(n => !n.read).length
+        setUnreadCount(unread)
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
+  }
+
+  const handleNotificationUpdate = () => {
+    fetchNotifications()
+  }
 
   return (
     <>
@@ -96,6 +47,7 @@ function Navbar() {
         onClose={() => setIsNotificationsOpen(false)}
         notifications={notifications}
         setNotifications={setNotifications}
+        onNotificationUpdate={handleNotificationUpdate}
       />
       <CartModal 
         isOpen={isCartOpen} 

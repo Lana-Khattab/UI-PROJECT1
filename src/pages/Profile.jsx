@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { authAPI, userAPI } from '../utils/api'
 
 function Profile() {
-  const { user: authUser, updateProfile: updateAuthProfile } = useAuth()
+  const { user: authUser, updateProfile: updateAuthProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -21,12 +21,20 @@ function Profile() {
   })
 
   useEffect(() => {
+    if (authLoading) {
+      console.log('Auth still loading, waiting...')
+      return
+    }
+    
     if (!authUser) {
+      console.log('No auth user found, redirecting to login')
       navigate('/login')
       return
     }
+    
+    console.log('Auth user found:', authUser)
     fetchUserData()
-  }, [authUser, navigate])
+  }, [authUser, authLoading, navigate])
 
   const fetchUserData = async () => {
     try {
@@ -87,7 +95,7 @@ function Profile() {
     return parsedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans min-h-screen transition-colors">
         <Navbar />

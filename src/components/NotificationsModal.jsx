@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { notificationAPI } from '../utils/api'
 
-function NotificationsModal({ isOpen, onClose, notifications, setNotifications }) {
+function NotificationsModal({ isOpen, onClose, notifications, setNotifications, onNotificationUpdate }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,6 +25,9 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
       const response = await notificationAPI.getAll()
       if (response.data.success) {
         setNotifications(response.data.notifications)
+        if (onNotificationUpdate) {
+          onNotificationUpdate()
+        }
       }
     } catch (err) {
       console.error('Error fetching notifications:', err)
@@ -41,7 +44,11 @@ function NotificationsModal({ isOpen, onClose, notifications, setNotifications }
   const markAllAsRead = async () => {
     try {
       await notificationAPI.markAllAsRead()
-      setNotifications(notifications.map(n => ({ ...n, read: true })))
+      const updatedNotifications = notifications.map(n => ({ ...n, read: true }))
+      setNotifications(updatedNotifications)
+      if (onNotificationUpdate) {
+        onNotificationUpdate()
+      }
     } catch (err) {
       console.error('Error marking all as read:', err)
     }

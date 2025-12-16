@@ -66,6 +66,16 @@ export const userAPI = {
     api.delete(`/users/collections/${collectionId}/recipes/${recipeId}`)
 };
 
+export const collectionAPI = {
+  getMyCollections: () => api.get('/collections/my-collections'),
+  getById: (id) => api.get(`/collections/${id}`),
+  create: (data) => api.post('/collections', data),
+  update: (id, data) => api.put(`/collections/${id}`, data),
+  delete: (id) => api.delete(`/collections/${id}`),
+  addRecipe: (collectionId, recipeId) => api.post(`/collections/${collectionId}/add-recipe`, { recipeId }),
+  removeRecipe: (collectionId, recipeId) => api.post(`/collections/${collectionId}/remove-recipe`, { recipeId })
+};
+
 export const orderAPI = {
   create: (data) => api.post('/orders', data),
   getAll: () => api.get('/orders'),
