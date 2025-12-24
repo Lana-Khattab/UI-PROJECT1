@@ -2,8 +2,7 @@ import Navbar from '../components/Navbar'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import axios from 'axios'
-import { recipeAPI } from '../utils/api'
+import { collectionAPI } from '../utils/api'
 
 function Collections() {
   const [collections, setCollections] = useState([])
@@ -15,28 +14,18 @@ function Collections() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Get JWT token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem('token')
-  }
-
-  // Fetch collections from backend API
   useEffect(() => {
     const fetchCollections = async () => {
       try {
         setLoading(true)
-        const token = getAuthToken()
+        const token = localStorage.getItem('token')
         if (!token) {
           setError('Please login to view collections')
           setLoading(false)
           return
         }
 
-        const response = await axios.get('http://localhost:5000/api/collections/my-collections', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
+        const response = await collectionAPI.getMyCollections()
 
         if (response.data.success) {
           setCollections(response.data.collections || [])
@@ -59,19 +48,10 @@ function Collections() {
     if (!newCollectionName.trim()) return
 
     try {
-      const token = getAuthToken()
-      const response = await axios.post('http://localhost:5000/api/collections', 
-        {
-          name: newCollectionName,
-          description: ''
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const response = await collectionAPI.create({
+        name: newCollectionName,
+        description: ''
+      })
 
       if (response.data.success) {
         setCollections([...collections, response.data.collection])
@@ -90,12 +70,7 @@ function Collections() {
     }
 
     try {
-      const token = getAuthToken()
-      const response = await axios.delete(`http://localhost:5000/api/collections/${collectionId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const response = await collectionAPI.delete(collectionId)
 
       if (response.data.success) {
         setCollections(collections.filter(collection => collection._id !== collectionId))
@@ -111,18 +86,9 @@ function Collections() {
       const collection = collections.find(c => c._id === collectionId)
       if (!collection) return
 
-      const token = getAuthToken()
-      const response = await axios.put(`http://localhost:5000/api/collections/${collectionId}`,
-        {
-          isFavorite: !collection.isFavorite
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const response = await collectionAPI.update(collectionId, {
+        isFavorite: !collection.isFavorite
+      })
 
       if (response.data.success) {
         setCollections(collections.map(c => 
@@ -137,19 +103,9 @@ function Collections() {
 
   const addRecipeToCollection = async (collectionId, recipeId) => {
     try {
-      const token = getAuthToken()
-      const response = await axios.post(`http://localhost:5000/api/collections/${collectionId}/add-recipe`,
-        { recipeId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const response = await collectionAPI.addRecipe(collectionId, recipeId)
 
       if (response.data.success) {
-        // Update the collection in state
         setCollections(collections.map(collection => {
           if (collection._id === collectionId) {
             return response.data.collection
@@ -165,19 +121,9 @@ function Collections() {
 
   const removeRecipeFromCollection = async (collectionId, recipeId) => {
     try {
-      const token = getAuthToken()
-      const response = await axios.post(`http://localhost:5000/api/collections/${collectionId}/remove-recipe`,
-        { recipeId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const response = await collectionAPI.removeRecipe(collectionId, recipeId)
 
       if (response.data.success) {
-        // Update the collection in state
         setCollections(collections.map(collection => {
           if (collection._id === collectionId) {
             return response.data.collection
@@ -195,16 +141,7 @@ function Collections() {
     if (!editName.trim()) return
 
     try {
-      const token = getAuthToken()
-      const response = await axios.put(`http://localhost:5000/api/collections/${collectionId}`,
-        { name: editName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const response = await collectionAPI.update(collectionId, { name: editName })
 
       if (response.data.success) {
         setCollections(collections.map(collection => 

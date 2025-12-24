@@ -106,8 +106,7 @@ function Profile() {
 
       const response = await authAPI.uploadAvatar(formData)
       if (response.data.success) {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-        const baseUrl = apiUrl.replace('/api', '')
+        const baseUrl = ''
         const avatarUrl = `${baseUrl}${response.data.avatar}`
         
         setUser({ ...user, avatar: avatarUrl })

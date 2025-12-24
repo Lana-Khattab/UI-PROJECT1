@@ -99,8 +99,7 @@ function AddRecipe() {
 
       const response = await recipeAPI.uploadImage(uploadFormData)
       if (response.data.success) {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-        const baseUrl = apiUrl.replace('/api', '')
+        const baseUrl = ''
         const imageUrl = `${baseUrl}${response.data.imageUrl}`
         
         setFormData(prev => ({ ...prev, imageUrl }))
