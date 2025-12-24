@@ -1,0 +1,43 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - foodies-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/foodies
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - DATA_PATH=/app/src/data
+    depends_on:
+      - mongo
+    volumes:
+      - uploads:/app/uploads
+      - ./src/data:/app/src/data:ro
+    networks:
+      - foodies-network
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - foodies-network
+
+volumes:
+  mongo-data:
+  uploads:
+
+networks:
+  foodies-network:
+    driver: bridge
+

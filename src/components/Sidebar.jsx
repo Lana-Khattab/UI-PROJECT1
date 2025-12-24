@@ -3,27 +3,36 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import useRandomRecipe from '../utils/useRandomRecipe'
 import { useAuth } from '../context/AuthContext'
-import { userAPI } from '../utils/api'
+import { collectionAPI } from '../utils/api'
 
 function Sidebar() {
   const goRandom = useRandomRecipe()
   const { user, isAuthenticated } = useAuth()
   const [collections, setCollections] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
       loadCollections()
+    } else {
+      setCollections([])
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, user])
 
   const loadCollections = async () => {
     try {
-      const response = await userAPI.getCollections()
+      setLoading(true)
+      const response = await collectionAPI.getMyCollections()
       if (response.data.success) {
-        setCollections(response.data.collections || [])
+        const allCollections = response.data.collections || []
+        const favoriteCollections = allCollections.filter(c => c.isFavorite)
+        setCollections(favoriteCollections)
       }
     } catch (error) {
       console.error('Error loading collections:', error)
+      setCollections([])
+    } finally {
+      setLoading(false)
     }
   }
 

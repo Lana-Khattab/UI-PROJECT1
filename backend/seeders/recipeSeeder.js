@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const Recipe = require('../models/Recipe');
 const Product = require('../models/Product');
-const recipesData = require('../../src/data/recipes.json');
-const productsData = require('../../src/data/products.json');
+
+const dataPath = process.env.DATA_PATH || path.join(__dirname, '../../src/data');
+const recipesData = require(path.join(dataPath, 'recipes.json'));
+const productsData = require(path.join(dataPath, 'products.json'));
 
 const seedRecipes = async () => {
   try {
